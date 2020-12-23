@@ -1,0 +1,71 @@
+//  Page 1
+
+= Ein Evaluatorgenerator für zwei heuristische TeilklassenSequentiell Orientierbarer Erweiterter Affixgrammatiken
+
+Master Thesis
+
+March 1998
+
+Denis Kuniß
+
+Technische Universität Berlin
+
+Fachbereich Informatik
+
+Institut für Angewandte Informatik
+
+FG Programmiersprachen und Compiler
+
+// -------------------------------------------------------------------------------
+//  Pages 2-3 Content Directory
+
+// -------------------------------------------------------------------------------
+// Page 4
+
+
+
+// -------------------------------------------------------------------------------
+// Page 103 References
+
+[[[bibliography]]]
+== References
+
+[[[COMA]]] Wagner, Ripphausen-Lipa, Scheffler: Computerorientierte Mathematik II, Skript zur LV, SS 1991
+
+[[[DeWe]]] Jochen Demuth, Stephan Weber: Eine konzeptionelle Revision des Eta-Compilergenerators und ihre Implementierung, Diplomarbeit TU Berlin, Fachbereich Informatik, Institut für Angewandte Informatik,
+Dezember 1996
+
+[[[DeWeKaKr]]] Jochen Demuth, Stephan Weber, Sönke Kannapinn, Mario Kröplin: Echte Compilergenerierung - Effiziente Implementierung einer abgeschlossenen Theorie  aus der Reihe Forschungsberichte des FB Informatik, Bericht 1997/6
+
+[[[Engelfriet]]] J. Engelfriet: Attribute grammars: Attribute evaluation methods In B.Lorho, editor, Methods and Tools for Compiler Construction, pages 103-138, Cambridge University Press 1984
+
+[[[EngFil]]] J. Engelfriet, G.Filé: Simple multi-visit attribute grammars, Journal of Computer and System Sciences, 24(3):283-314, June 1982
+
+[[[EngJong]]] Joost Engelfriet, Willem de Jong: Attribute Storage Optimization by Stacks, Acta Informatica 27, 568-581, 1990
+
+[[[GySiMa]]] Gyimoth, Simon, Makey, An implementation of the HLP. in Acta Informatica 1983, 06/83
+
+[[[IbaKat]]] T.Ibaraki, N.Katoh: On-line computation of transitive closures of graphs, Information Processing Letters, 16:95-97, 1983
+
+[[[Kastens]]] U.Kastens: Ordered Attribute Grammars.
+Acta Informatica, 13(3): 229-256, 1980
+
+[[[KaHuZi]]] U.Kastens, B.Hutten, E.Zimmermann: GAG: A Practical Compiler Generator, Volume 141 of Lecture Notes in Computer Science
+Springer Verlag 1982
+
+[[[KröpKann]]] Mario Kröplin, Sönke Kannapinn:  Sequentiell orientierbare Attributgrammatiken Vorabdruck, TU Berlin, Fachbereich Informatik, Institut für Angewandte Informatik, 25. Januar 1995
+
+[[[Kutza]]] Karsten Kutza:  Evaluation geordneter EAGen im eta-Compiler-Generator, Bericht 1989/2 TU Berlin, Fachbereich Informatik, 1989
+
+[[[Mehlhorn]]] Kurt Mehlhorn: Graph Algorithms and NP-Completeness
+ETACS Series in Computer Science, Springer Verlag
+
+[[[ReiWi]]] Martin Reiser, Niklaus Wirth: Programmieren in Oberon: Das neue Pascal, Bonn-Paris, Addison-Wesley 1994
+
+[[[RepTei]]] T.W.Reps, T.Teitelbaum: The Synthesizer Generator: A System for Constructing Language-Bases Editors Texts and Monographs in Computer Science, Springer-Verlag, 1988
+
+[[[Schröer]]] F.W. Schröer: Eta: Ein Compiler-Generator auf Basis zweistufiger Grammatiken, Bericht 84/2, TU Berlin, Fachbereich Informatik, März 1984, 104
+
+[[[Watt]]] D.A. Watt: Analysis Oriented Two Level Grammars, Ph. D. thesis, Galsgow 1974
+
+[[[ZiVoKüNa]]] B.Zimmermann, K.Voßloh, D.Kürbis, N.Nayeri: Compiler-Generierung II: Spezifikationskalküle und Implementierungskonzepte, Skript einer Lehrveranstaltung an der TU Berlin WS94/95
