@@ -22,7 +22,31 @@ FG Programmiersprachen und Compiler
 // -------------------------------------------------------------------------------
 // Page 4
 
+== Foreword
+The present diploma thesis is the provisional conclusion of an intensive occupation of several years with theory and practice of compiler generation. The discussion of this topic was the main focus of my studies and was supported by the FG Programming Languages and Compilers of the Department of Computer Science at the TU Berlin under the direction of Prof. Dr. Bleicke Eggers. InSönke Kannapinn and Mario Kröplin in particular, who have supported my fascination for this subfield of for this subfield of computer science through excellent lectures and didactically outstanding seminars and tutorials. I owe a large part of my engineering-technical knowledge to them.
 
+I would like to thank Prof. Eggers for his efforts to present a holistic view of things in his lectures, which is not limited to the field of computer science, and for providing food for thought about the responsibilities of engineers and scientists, responsibility of the engineer or scientist for the future. His lectureson the social relevance of computer science, I have rediscovered my inclination for philosophy and and that I have been sensitized for socio-critical considerations.
+
+This paper is intended for readers who are familiar with the problems of compiler generation and formallanguages in general and the ordered attribute grammars [Kastens] and Extended Affix Grammars <<Watt>> in particular. Furthermore, a previous reading of thethesis by Demuth and Weber <<DeWe>> or the research report <<DeWeKrKa>>  is recommended.
+
+I dedicate this work to my wife Julia.
+Berlin, March 26, 1998.
+Denis Kuniß
+
+
+// -------------------------------------------------------------------------------
+// Page 5
+
+== Introduction
+
+Compilers basically realize complex partial functions: they map elements of a well-defined subset of all buildable strings into other strings; the definition and value domain of a compiler understood as a function are formal languages. The implementation of a compiler results is in principle the result of the comparison of sentences of the source language and the sentences of the target
+target language. The number of sentences in a formal language is however potentially infinite, a Compilerof this form would therefore not be recordable. Now the sentences of many languages can be structured in such a way that
+a finite structure of all sentences of a language can be derived. These structures, called grammars could now, since they are finite, be used constructively for the comparison in a compiler.
+
+
+
+// -------------------------------------------------------------------------------
+// Page
 
 // -------------------------------------------------------------------------------
 // Page 103 References
