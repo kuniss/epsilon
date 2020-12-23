@@ -43,10 +43,51 @@ Compilers basically realize complex partial functions: they map elements of a we
 target language. The number of sentences in a formal language is however potentially infinite, a Compilerof this form would therefore not be recordable. Now the sentences of many languages can be structured in such a way that
 a finite structure of all sentences of a language can be derived. These structures, called grammars could now, since they are finite, be used constructively for the comparison in a compiler.
 
+Unfortunately this comparison is not comprehensible in "handwritten" compilers. Thus however
+the actual function of a compiler is not transparent. Also the best and most exact manual of a
+compiler does not describe its function completely. The only complete description of the
+functionality of a compiler is its coding. But who wants to be expected to read the source code of a compiler for verification, especially the actual translation structure of programming styles, inadequacies of the used programming language or optimizations, if the source code is at all available.
+Source code at all is available. Desirably a formalism would be, in which structures of the source and target language in a simple, clear form to be contrasted and from which automatically
+a compiler can be generated.
 
+The _attribute grammars_ (AGs) introduced by Knuth provide a formalism that can be used not only to describe not only for the description of programming languages, but also as basis for the automatic generation of compilers. This formalism requires as open calculus however the use of a further specification or programming language for the description of the context conditions and the context conditions and the semantics of a language. This complicates the understanding of the compiler and obscures its actual functionality, as in the "handwritten" compiler.
+
+The _extended affix grammars_ (EAGs) introduced by Watt represent a closed calculus and compensate for this disadvantage <<Watt>>. Syntax and semantics of a programming language are described in a formalism, which omits all non-relevant information - concerning the optimization, the used Implementation language used and other - concerning - renounces. The comparison of the source and target language is explicit and describes the transformation function to be realized by the compiler to be realized by the compiler unambiguously and in simple form. In 1984 a compiler generator called Eta was developed by Schröer at the Department of Computer Science of the TU Berlin based on the Extended Affix Grammars <<Schröer>>. advantages of this concept for the automatic generation of translators and has been used since then with many has since been used with many extensions also in the context of courses. One of these extensions transfers the principle of ordered attribute grammars (OAGen, [Kastens]) into the world of extended Affix  Grammars and was integrated into the compiler generator Eta by Kutza in 1989 [Kutza]. The OAGen are a polynomial subclass of the multi-visit AGs introduced by Engelfriet [Engelfriet]. For multi-visit AGs a runtime and size efficient evaluator can be given, unfortunately the decision whether a multi-visit AG exists is NP-complete.
+
+OAGs are computed via the polynomial computability of a total order over the attribute of each grammar symbol X, such that in every possible attributed derivation tree the attribute instances of an instance of X can always be evaluated according to this order, are defined. However, there are always practical AGs occur for which such a total order of attributes cannot be computed. Kastens gives different possibilities to be able to order the attributes of an AG after all <<KaHuZi>>, which however leave many problematic AGs unnoticed. Kröplin and Kannapinn have in their work a generalization of one of these ideas <<KröpKann>>. The AGs they specify are _sequentially orientable_ AGs (SOAGs) are a subclass of mult-visit AGs, and the decision,  whether an AG is an SOAG is also NP-complete. The authors present a procedure to identify the AG "responsible" for the NP-completeness "responsible" nondeterminism with an ad hoc determinism, whereby an attribute evaluation order can be computed for all OAGs and many non-OAGs.
+
+The task of the present diploma thesis was to transfer the principle of SOAGs to the Extended grammars and to implement an evaluator generator for the outlined procedure. implemented. The starting point for this is the compiler generator _Epsilon_, which was developed at the TU Berlin under the guidance of Kröplin and Kannapinn in the context of the diploma thesis of Demuth and Weber.
+
+// -------------------------------------------------------------------------------
+// Page 6
+
+<<DeWe>>. It replaces the predecessor system Eta, which was "outdated" in its conception and could not be further maintained with the extremely low system _Eta_ and, in particular, provides a parser generator with scanner.
+
+The paper describes the implementation of the principle of SOAGs in the concept of Extended Affix Grammars and closely follows it. In order to underline this concern and to clarify the complexity of the implementation, the source texts are commented.implementation, the source texts are commented and reprinted in the original. Thus the description of abstract algorithms is omitted. This work can describe the underlying theory only rudimentarily in terms of the implementation. in the sense of the implementation, for a comprehensive treatment must be referred to appropriate sources <<KröpKann>>. must be referred to <<KröpKann>>.
+
+The following documentation starts with a general overview of the implementation and the auxiliary modules used. Chapter 3 introduces the terminology of the EAGs and documents the central data structures. data structures. Chapters 4, 5 and 6 present the modules which create the prerequisite for the generation of an evaluator. of an evaluator; this includes the computation of evaluation sequences, visit sequences and optimization information. Chapter 7 undertakes an effort analysis of the presented algorithms, and in the last chapter the actual code generation is treated.
+
+The appendix contains a reduced example with the module generated by the evaluator generator, as well as an analysis of two non-OEAGs that are recognized as SOEAGs by the generator.
+
+// -------------------------------------------------------------------------------
+// Page 7
+
+==  General information about the implementation
+
+Based on the existing compiler generator Epsilon the programming was done with the programming language Oberon <<ReiWi>> in the operating system of the same name. In order to have a uniform working and test environment, Oberon was likewise selected as target language of the generation. The compiler generator Epsilon contains the two basic modules _IO_ and _eSets_, which are also used in this system extension. system extension. A description of these two modules can be found in <<DeWe>>. The programming techniques suggested there of the grouping of program objects of a type in a field is further used. Data type extensions are made by creating a parallel field. To
+each field `_F_` there is a constant `_firstF_`, which symbolizes the first usable index of the field, and a variable `_NextF_`, which points to the first empty field entry. The fields are expanded by module-local procedures named `Expand`. Undefined references to these fields are represented by the constant `nil`.
 
 // -------------------------------------------------------------------------------
 // Page
+
+// Example for image
+// doc\soag\images\image-3.1-system-structure.PNG
+
+----
+Example for code snippet
+----
+
+// images sind unter C:\Users\Max Kuniß\git\epsilon\doc\soag\images
 
 // -------------------------------------------------------------------------------
 // Page 103 References
