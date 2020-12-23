@@ -84,6 +84,25 @@ Interface:Lists and Stacks
 The module eAList implements lists as dynamically extendable fields and realizes the following
 interface:
 
+----
+DEFINITION eALists;
+    CONST
+        firstIndex = 0;
+    TYPE
+        AList = POINTER TO AListDesc;
+        AListDesc = RECORD
+            Last: INTEGER;
+            Elem: OpenList;
+        END;
+
+    PROCEDURE Append (VAR List: AList; Value: INTEGER);
+    PROCEDURE Delete (VAR List: AList; Index: INTEGER);
+    PROCEDURE IndexOf (VAR List: AList; Value: INTEGER): INTEGER;
+    PROCEDURE New (VAR List: AList; Len: INTEGER);
+    PROCEDURE Reset (VAR List: AList);
+END eALists.
+----
+
 // -------------------------------------------------------------------------------
 // Page
 
