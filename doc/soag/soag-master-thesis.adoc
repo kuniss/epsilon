@@ -81,8 +81,7 @@ each field `_F_` there is a constant `_firstF_`, which symbolizes the first usab
 
 The `eAList` module implements lists as dynamically expandable fields and implements the following
 Interface:Lists and Stacks
-The module eAList implements lists as dynamically extendable fields and realizes the following
-interface:
+The module eAList implements lists as dynamically extendable fields and realizes the following interface:
 
 ----
 DEFINITION eALists;
