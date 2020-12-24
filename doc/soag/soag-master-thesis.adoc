@@ -192,7 +192,61 @@ DEFINITION eASets;
     PROCEDURE Test;
 END eASets.
 
-The only addition is the `IsEmpty` function, which indicates whether a set is empty. In contrast to `eBSets` the bit vector was omitted completely. The elements are entered into the list `ASet.List` in the order of their insertion into the set. the set into the list `ASet.List`, where `ASet.List.Last` refers to the last element entered. element. The list is implemented as a field and results from the field entries of `ASets.List[eASets.firstIndex] to ASets.List[ASet.List.Last]. If the value i of an element to be inserted into the set is greater than `ASet.List.Last`, then i is appended to the end of the list and a pointer to the end of the list is entered in the field position ASet.List[i]. If the value i of the element is less than or equal to ASet.List.Last, it is inserted at the position ASet.List[i]. is entered. The element that was previously at its position is moved to the end of the list and its pointer is and its pointer is moved accordingly. This procedure divides the field into two halves. In the  first part lists the elements contained in the set. The second part contains for all set elements whose value is greater than ASet.List.Last, a value greater than zero on their field position and otherwise the value noelem. When the contents of the set S are changed by the interface procedures the following invariants are preserved in the ASet.List field. For all field indices i less-than-equal to the data element ASet.List.Last: 
+The only addition is the `IsEmpty` function, which indicates whether a set is empty. In contrast to `eBSets` the bit vector was omitted completely. The elements are entered into the list `ASet.List` in the order of their insertion into the set. the set into the list `ASet.List`, where `ASet.List.Last` refers to the last element entered. element. The list is implemented as a field and results from the field entries of `ASets.List<<eASets.firstIndex>>` to `ASets.Lis<<ASet.List.Last>>`. If the value i of an element to be inserted into the set is greater than `ASet.List.Last`, then i is appended to the end of the list and a pointer to the end of the list is entered in the field position `ASet.List<<i>>`. If the value i of the element is less than or equal to `ASet.List.Last`, it is inserted at the position ASet.List[i]. is entered. The element that was previously at its position is moved to the end of the list and its pointer is and its pointer is moved accordingly. This procedure divides the field into two halves. In the  first part lists the elements contained in the set. The second part contains for all set elements whose value is greater than `ASet.List.Last`, a value greater than zero on their field position and otherwise the value noelem. When the contents of the set S are changed by the interface procedures the following invariants are preserved in the `ASet.List field`. For all field indices i less-than-equal to the data element `ASet.List.Last`:
+----
+    ASet.List[i]=i ⇔ i∈S ∧ ASet.List[i]≠i ⇒ ASet.List[i]∈S
+----
+
+and for all field indices `i` that are greater than the data element `ASet.List.Last`:
+
+----
+    i∈S ⇔ ASet.List[i]≠noelem ∧ i∉S ⇔ ASet.List[i]=noelem
+----
+
+From these invariants it is very easy to derive when an element is contained in a set. This makes the bit vector superfluous. The procedures Insert and Delete can be realized with constant effort.
+
+In summary it can be stated that the module `eASets` is particularly well suited for the implementation of densely populated sets, while the module `eBSets` is more suitable for sparsely populated sets, when no time-critical time-critical deletion of elements is required. Both modules can only  constant sets, dynamic extensions during runtime are not possible.
+
+Both set implementations use the `eAList` module. However, this is a complete
+encapsulation - you should not apply the interface procedures of the `eAList` module to the list data module `eAList` on the list data structures of the sets, since this can make the data structure inconsistent. The option of dynamic extensibility of lists is not used in the implementations of the sets.
+
+For all generated compilers additionally the independent module `eLIStacks` was implemented, which manages data elements of the type `LONGINT`.
+
+// -------------------------------------------------------------------------------
+// Page 10
+
+=== System structure
+
+The SOAG evaluator generator extends the original compiler generator Epsilon by the modules shown in Fig. 3-1. The arrows indicate significant import relationships between the modules. The modules `eALists`, `eStacks`, `eASets`, and `eBSets` are used multiple times to implement Lists, Sets, and Cellar Stores, which can be instantiated in any number. The modules with the "SOAG" prefix describe the actual SOAG evaluator generator. The module `SOAG` contains the central data structures of the generator. In the module `SOAGPartition` the Affixpartition of the analyzed grammar is calculated and thus it is decided whether the generation of an evaluator is possible. In
+
+// doc\soag\images\image-3.1-system-structure.PNG
+
+`SOAGVisitSeq`, the visit sequences for the evaluator are calculated using the `SOAGHash` module, which implements a hash table. Optionally, the `SOAGOptimizer` module provides information to information is provided by the module `SOAGOptimizer`, which allows an optimization of the generated evaluator by storing affix variables in cellar memories and global variables. The module `SOAGGen` generates from the Visit sequences the  The module `SOAGProtocol` serves above all for the logging of central data structure contents during development. central data structure contents during the development.
+
+As in the original compiler generator Epsilon, all modules are prefixed with an "e" to prevent name conflicts with the Oberon system.
+
+// -------------------------------------------------------------------------------
+// Page 16
+
+== Definition of terms and internalization
+
+This chapter provides a brief formal definition of EAGs to capture the terminology used in the rest of the paper. terminology used in further work. It is closely based on the definitions of Kutza [Kutza]. Since however EAGen in the compiler generator Epsilon are no longer available in normal form, some extensions and new definitions became necessary. The terms _affix parameter_ and _defining affix_ are newly introduced and the data structure for the internal representation of the EAGen is described.
+
+=== Terminology and definition of EAGs
+
+An Extended Affix Grammar is an 8-tuple
+----
+    	EAG = (MN, MT, MR, HN, HT, SPEC, HR, S)
+----
+whose individual components are defined as follows:
+
+-_MN_ is a finite set of _meta-non-terminals_. If _M_ ∈ _MN_, then _M_, _M1_, _M2_, ... as well as _#M_, _#M1_, _#M2_, ... _Affixes_ to _M_.
+For any affix _A_ to _M_, _dom(A)_ := _M_ is the range of values of the `affix`. In several other sources the term _variable_ is used synonymously to the term `affix`.
+
+-_MT_ represents the finite set of _meta-terminals_ with MN ∩ _MT_ = ∅.
+
+-_MR_ represents the finite set of _meta-rules_ of the form _M0_ = _M1_.... _Mn_ with _n0_ and _M0_ ∈ _MN_ and _Mi_ ∈ _MN_ ∪ _MT_).
+
 
 // -------------------------------------------------------------------------------
 // Page
