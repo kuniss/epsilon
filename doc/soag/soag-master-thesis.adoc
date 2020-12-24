@@ -163,12 +163,12 @@ The `BSetDesc` data structure contains a bit vector that is not visible in the i
 
 The procedure `New` creates a set of constant size. `Reset` deletes the content of a set, the allocated data structure is preserved and can be reused. The function `In` checks whether an element is contained in the set. set is contained. The list of elements contained in the set S can be effectively accessed by constructs of the type S.List<<eBSets.firstIndex>> to S.List<<S.List.Las>>]. The procedures Insert and Delete add an element to the set and delete it from the set, respectively. The deletion of an element is of linear effort in this implementation, because the list of the contained elements must be searched for it. 
 
-The linear overhead for deleting an element can unnecessarily increase the overhead of an algorithm by a power of by a power. Therefore, quantities have been implemented in the `eASets` module that allow the deletion of a
+The linear overhead for deleting an element can unnecessarily increase the overhead of an algorithm by a power of by a power. Therefore, quantities have been implemented in the `eASets` module that allow the deletion of a 
 
 // -------------------------------------------------------------------------------
 // Page 9
 
-
+element in constant time and for which the list of elements contained in a set can be retrieved efficiently. can be retrieved. The interface is similar to the previous module:
 
 // -------------------------------------------------------------------------------
 // Page
