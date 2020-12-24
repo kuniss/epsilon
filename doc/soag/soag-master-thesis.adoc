@@ -102,6 +102,61 @@ DEFINITION eALists;
 END eALists.
 ----
 
+The procedures `New` and `Reset` create a new list and empty it respectively. The procedure `Append` adds an element to the the end of the list. The `Delete`  procedure deletes an element from the list by overwriting the position of the element to be deleted with the last element of the list. overwriting the position of the element to be deleted with the last element of the list and shortening the list by one element. element from the list. Thus, the action is of constant effort, but changes the sequence  within the list. The `IndexOf` function returns the list index of an element. The element is determined by linear search.
+
+Furthermore, an `eStacks` module was implemented to describe basement storage. This module is based on the previous module and implements the known basement storage procedures:
+
+// -------------------------------------------------------------------------------
+// Page 8
+
+----
+DEFINITION eStacks;
+    
+    IMPORT eALists;
+
+    TYPE
+        Stack = POINTER TO RECORD (eALists.AListDesc) END;
+
+    PROCEDURE IsEmpty (S: Stack): BOOLEAN;
+    PROCEDURE New (VAR S: Stack; Len: INTEGER);
+    PROCEDURE Pop (VAR S: Stack; VAR Val: INTEGER);
+    PROCEDURE Push (VAR S: Stack; Val: INTEGER);
+    PROCEDURE Reset (VAR S: Stack);
+    PROCEDURE Top (VAR S: Stack; VAR Val: INTEGER);
+
+END eStacks.
+----
+
+=== Different implementations of sets
+
+The base module `eSets` proved to be unsuitable in effort-critical sections of the implementation. In particular, the elements contained in a set could not be accessed efficiently as a list.  the bit vector representing the set, even for sparse sets, would have had to be traversed completely. would have had to be traversed completely. It is obvious to extend the data structure of the base module by a list of the elements contained in the set. contained in the set. This allows efficient access and increases the memory requirement only slightly for sparse sets. only insignificantly for sparse sets. This approach was realized in the module `eBSets` with the following interface:
+
+----
+DEFINITION eBSets;
+
+    IMPORT eALists;
+
+    CONST
+        firstIndex = 0;
+
+    TYPE
+        BSet = POINTER TO BSetDesc;
+        BSetDesc = RECORD
+            Max: INTEGER;
+            List: eALists.AList;
+        END;
+
+    PROCEDURE Delete (VAR S: BSet; Elem: INTEGER);
+    PROCEDURE In (S: BSet; Elem: INTEGER): BOOLEAN;
+    PROCEDURE Insert (VAR S: BSet; Elem: INTEGER);
+    PROCEDURE New (VAR S: BSet; MaxElem: INTEGER);
+    PROCEDURE Reset (VAR S: BSet);
+
+END eBSets.
+----
+
+
+
 // -------------------------------------------------------------------------------
 // Page
 
