@@ -226,7 +226,7 @@ The SOAG evaluator generator extends the original compiler generator Epsilon by 
 As in the original compiler generator Epsilon, all modules are prefixed with an "e" to prevent name conflicts with the Oberon system.
 
 // -------------------------------------------------------------------------------
-// Page 16
+// Page 17
 
 == Definition of terms and internalization
 
