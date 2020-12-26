@@ -245,9 +245,42 @@ For any affix _A_ to _M_, _dom(A)_ := _M_ is the range of values of the `affix`.
 
 -_MT_ represents the finite set of _meta-terminals_ with MN ∩ _MT_ = ∅.
 
--_MR_ represents the finite set of _meta-rules_ of the form _M0_ = _M1_.... _Mn_ with _n0_ and _M0_ ∈ _MN_ and _Mi_ ∈ _MN_ ∪ _MT_).
+-_MR_ represents the finite set of _meta-rules_ of the form _M~0~_ = _M~1~_.... _M~n~_ with _n0_ and _M~0~_ ∈ _MN_ and _M~i~_ ∈ _MN_ ∪ _MT_).
 
+The context-free grammar _MG~M~_ := (_MN_, _MT_, _MR_, _M_) is called the meta-grammar spanned by the meta-non-terminal _M_ is called the _meta-grammar_ spanned by the meta-non-terminal _M_. _Affix forms_ to a meta-non-terminal M are sentence forms of MG~M~ in which all occurring meta-nonterminals have been replaced by corresponding affixes.
 
+-_HN- is a finite set of _hyper-nonterminals_.
+
+-_HT_ is a finite set of _hyper-terminals_, with _HN_ ∩ -HN_ = ∅.
+
+-_SPEC_ is a finite set of _specifications_ of the form _H_ _( dir(a~1~) dom(a~1~), ..., dir(a~#a(H)~) dom(a~#a(H)~))_,
+therein are:
+
+-_#a(H)_ is the ordinality of _H_
+
+-the tuples _ai_ with _0 < i ≤ #a(H)_ affix positions of H, which are also named in the form ai H ai H. The set A(H) = { a~i~^H^ : 0 < i ≤ #a(H)} is the set of all affix positions of the hypernonterminal _H_.
+
+-_dir(a~i~)_ ∈ {↑,↓} is the direction of the affix position _a~i~_. Affix positions with the direction ↓ are  _inherited_, those with the direction ↑ _synthesized_. _I(H)_ and _S(H)_ denote the sets of inherited and derived affixes of the hyper-nonterminal _H_, respectively.
+
+-_dom(a~i~)_ ∈ _MN_ the range of values of an affix position
+
+The specification of an _EAG_ is not explicitly present in the calculus of the compiler generator Epsilon, but is integrated into the syntactic structure of the hyper-rules for simplification. Formally, however, a separation is is unavoidable and also easier to handle. 
+
+If one inserts affix forms of the corresponding value range into the affix positions of a hyper non-terminal, then a _symbol occurrence_ results which is formally defined as follows: 
+
+If _H( dir(a~1~)_ M~1~, ..., _dir(a~#a(H)~) M~#a(H)~_ is a specification and _f~1~, .., f~#a(H)~_ are affix forms to _M~1~, .., M~#a(H)~_, then _H_, parameterised with affix forms _H(f~1~, .., f~#a(H)~)_, is a _symbol occurrence_. In other sources the term _hypernotion_ is also used.
+
+- _HR_ is a finite set of hyper-rules. A hyper-rule _r_ consists of one left and one right rule side and has the form _X~0~ : X~1~ ... X~n~_ with _~n~≥0_, where _X~0~_ is a symbol occurrence and the _X~i~_ are symbol occurrences or hyper-terminals. The colon separates the left-hand rule side from the right. So that the symbol occurrences can be clearly distinguished outside the rule context, they are additionally they are additionally parameterised with the rule: _X^i^~r~_.
+
+Within the generation of an evaluator, the hyper-terminals of a hyper-rule are abstracted.
+The expression _#S(r)_ defines the number of symbol occurrences in the rule _r_.
+
+// -------------------------------------------------------------------------------
+// Page  18
+
+In the context of a rule, the parameters ai of a symbol occurrence X(a~1~,..,a~#a(H)~) are called _affix parameters_. In order to be able to distinguish affix parameters unambiguously even without the context of the rule, they are with the rule _r_ and the index of the symbol occurrence _X~i~_: _a~k~^(r,i)^_. The position index _k_ refers either to the position of the affix parameter in the list of affix parameters of the symbol occurrence or, if the index of the symbol occurrence is omitted, to the position in the list of all affix parameters of a rule _r_: _a~k~^(r)^_. The expression _#a(r)_ quantifies the number of all affix parameters used in the rule _r_. The term affix parameter has been redefined in this work. In <<ZiVoKüNa>> there is the affix positions of the specification and the parameterisation of the symbol occurrences are not conceptually affix parameters are defined as affix positions of a rule. This would lead to confusion, especially in the description of the implementation, since affix parameters, as can be seen in thedefinition below, some affix parameters have other properties that cannot be applied to affix positions in any way. are in no way transferable to affix positions. Kutza defines the synonymous term of _affix occurrence_ <<Kutza>>, which I do not consider adequate, but for historical reasons it has found its way into the implementation.  for historical reasons. However, since there is a close relationship between affix parameters and affix positions, the following conceptual relation is defined: An affix parameter a~k~^(r,i)^ of a rule _r corresponds_ to an affix position _a~j~^X^_,  if _X~i~^r^_ =_X_ and _k=j_ holds. In this case _X~i~^r^_ is a symbol occurrence for the symbol _X_ in rule _r_, and the  affix parameter _a~k~^(r,i)^_ is on the _j_-th parameter position of the symbol occurrence _X~i~^r^_.
+
+The set of all affix parameters of a rule r is defined by _AP(r)_ := { a~k~^(r,i)^: 0 _<i≤#S(r)_ and 0<k≤_#a(X~i)~}_. An affix parameter a~k~^(r,i)^ is called defining if with _X=X~i~_ holds: (_i_=0 and _dir(a~k~^X^)_= ↓) or (_i_>0 and _dir(a~k~^X^)_=↑), and applicative if with _X=X~i~_ holds: (_i_=0 and _dir(a~k~^X^)_=↑) or (_i_>0 and _dir(a~k~^X^)_= ↓). _AP~D~(r)_ and _AP~A~(r)_ denote the sets of defining and applying affix parameters, respectively. The content of each applying affix parameter (a^(r,i)^) results from its affix form. The affix form, in turn, consists of affixes that result from defining affix parameters of the rule _r_. Thus, (a^(r,i)^) is defined as a function of a set D(a^(r,i)^) of affix parameters of the same rule. The well-formedness conditions ensure that the _EAG_ is in _Bochmann normal form_, i.e. that there are no applying affix parameters are contained in D(a^(r,i)^) are contained. _D_ is interpreted in the usual way as a relation on affix parameters, i.e.
 
 // -------------------------------------------------------------------------------
 // Page
