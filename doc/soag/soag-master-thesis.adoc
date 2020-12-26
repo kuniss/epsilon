@@ -248,6 +248,7 @@ For any affix _A_ to _M_, _dom(A)_ := _M_ is the range of values of the `affix`.
 -_MR_ represents the finite set of _meta-rules_ of the form _M0_ = _M1_.... _Mn_ with _n0_ and _M0_ ∈ _MN_ and _Mi_ ∈ _MN_ ∪ _MT_).
 
 
+
 // -------------------------------------------------------------------------------
 // Page
 
