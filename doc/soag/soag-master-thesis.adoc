@@ -365,7 +365,58 @@ VAR
 
 To calculate the SOAG property of a specification, each alternative of the initial data structure must be converted into an independent rule. The optional alternative and the repetition must be stored in their BNF equivalent form. All these rules are recorded in the `Rule` field. `SymOcc` refers to an area in the `SymOcc` field containing all symbol occurrences of a rule `AffOcc` refers to an area in the `AffOcc` field containing all affix parameters belonging to the rule.
 
-The connection to the output data structure of the EAG module is established by the RECORD field `Rule` in the type extension `EmptyRule` and by the RECORD field `Alt` in the type extension `OrdRule` (_ordinary rule_). These are necessary to enable access to the parameters and text positions of the rules. enable access to the parameters and text positions of the rules. The transformed rules are directly reflected in the data structure to be described. For a pictorial illustration of the data structure, I use the  
+The connection to the output data structure of the EAG module is established by the RECORD field `Rule` in the type extension `EmptyRule` and by the RECORD field `Alt` in the type extension `OrdRule` (_ordinary rule_). These are necessary to enable access to the parameters and text positions of the rules. enable access to the parameters and text positions of the rules. The transformed rules are directly reflected in the data structure to be described. For a pictorial illustration of the data structure, I use the following table (Table 4-1)
+
+// doc\soag\images\-table-4-1-Transformation-of-the-EBNF-rules.PNG
+
+Example specification. The unique indexing of the affixes in Table 4-1 serves only to track their positioning after the transformation. _λ_ symbolises the empty word. (r1) and (r2) denote two rules uniquely, and some indices on hyper-nonterminals are used to uniquely distinguish different occurrences of the hyper-non-terminal _A.
+
+----
+TYPE
+    SymOccDesc = RECORD
+        SymInd,
+        RuleInd: INTEGER;
+        Nont: EAG.Nont;
+        AffOcc: EAG.ScopeDesc;
+        Next: INTEGER;
+    END;
+
+    OpenSymOcc = POINTER TO ARRAY OF SymOccDesc;
+
+VAR
+    SymOcc: OpenSymOcc;
+----
+
+// -------------------------------------------------------------------------------
+// Page 21
+
+// doc\soag\images\figure-4-1-illustration-of-the-connection-between-SOAG-and-EAG-data-structure.PNG
+
+The field `SymOcc` contains all symbol occurrences that occur in the transformed rules of the specification. `SymInd` is an index into the field `Sym`. `Nont` refers to the HyperNonterminal of the output data structure of the module EAG. As in the previous type declaration, the RECORD field `AffOcc` refers to the affix parameters belonging to the hyper-non-terminal.  affix parameters belonging to the hyper-non-terminal. The RECORD field `Next` points to the next occurrence of the same hyper non-terminal. `Next` is used to form a list of all occurrences of a hyper-non-terminal in all rules. are formed.
+
+----
+TYPE
+    AffOccDesc = RECORD
+        ParamBufInd,
+        SymOccInd: INTEGER;
+        AffOccNum: RECORD
+            InRule,
+            InSym: INTEGER;
+        END
+    END;
+    
+    OpenAffOcc = POINTER TO ARRAY OF AffOccDesc;
+
+VAR
+    AffOcc: OpenAffOcc;
+----
+
+The affix parameters of a hyper non-terminal are stored in the `AffOcc` field. Each field entry contains a reference to the affix form through the index `ParamBufInd`, which refers to the field `ParamBuf` of the module `EAG`. `SymOccInd` refers to the occurrence of the symbol in the field `SymOcc`. coordinates of the affix parameter with respect to its rule, in which it is contained, and with respect to the hyper-non-terminal, which it parameterises, are declared.
+
+// -------------------------------------------------------------------------------
+// Page 22
+
+
 
 // -------------------------------------------------------------------------------
 // Page
