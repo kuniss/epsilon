@@ -416,7 +416,83 @@ The affix parameters of a hyper non-terminal are stored in the `AffOcc` field. E
 // -------------------------------------------------------------------------------
 // Page 22
 
- v
+// doc\soag\images\figure 4-1- illustration-of-the-connection-between-SOAG-and-EAG-data-structure.PNG
+
+----
+TYPE
+    SymDesc = RECORD
+        FirstOcc,
+        MaxPart: INTEGER;
+        AffPos: EAG.ScopeDesc;
+    END;
+
+    OpenSym = POINTER TO ARRAY OF SymDesc;
+    OpenPart = POINTER TO ARRAY OF INTEGER;
+    OpenDefAffOcc = POINTER TO ARRAY OF INTEGER;
+    OpenAffixApplCnt = POINTER TO ARRAY OF INTEGER;
+
+VAR
+    Sym: OpenSym;
+    PartNum: OpenPartNum;
+    DefAffOcc: OpenDefAffOcc;
+    AffixApplCnt: OpenAffixApplCnt;
+----
+
+The field `Sym` exists in parallel with the field `HNont` and contains an anchor in `FirstOcc` that refers to a list of all occurrences of a hyper-nonterminal in the structure described above. `AffPos` refers to an area in the `PartNum` field that will hold all partition numbers of the hyper-nonterminal's Affix positions belonging to the hyper non-terminal. `MaxPart` takes the maximum partition number of the symbol. Both elements are not calculated until the SOAGPartition module. 
+
+The field `DefAffOcc` is parallel to `EAG`. `Var` and takes for each affix variable the index of the affix parameter that contains the defining affix of the affix variable. 
+
+The `AffixApplCnt` field contains for each affix variable the number of its applications in syntheses and comparisons. It is used in the `SOAGGen` module to calculate the lifetime of affix variables. Its content is calculated in the `  `SOAGPartition` module.
+
+// -------------------------------------------------------------------------------
+// Page 23
+
+----
+VAR
+    NextSym,
+    NextPartNum,
+    NextRule,
+    NextSymOcc,
+    NextAffOcc,
+    NextVS,
+    NextDefAffOcc,
+    NextAffixApplCnt: INTEGER;
+----
+
+All variables of the form `NextFieldname` refer to the next free field entry of the respective field. 
+(This implementation principle was also used in the `EAG` module).
+
+// -------------------------------------------------------------------------------
+// Page 29
+
+== Determination of affix partitions
+
+The theory presented in this chapter for the calculation of affix partitions is essentially based on the work of Kröplin and Kannapin <<KröpKann>>. Only some adaptations to the terminology of the terminology used for the EAGs.
+
+=== Multi-visit EAGs
+
+In this section, multi-visit EAGs are defined using the orientations suggested by Kastens <<Kastens>>. orientations. For later modification, the OEAG method is reconstructed.
+
+A visit of a tree starts and ends at the root _r_ and consists in between of an arbitrary sequence of visits of the subtrees whose roots are sons of _r_. A family of ordered partitions _(A~1~(X),...,A~n(X)~(X))_ for _X_ ∈ _HN_ with n  _(X)_ ≥ _0_ is _visit-correct_ if and only if for each derivation tree _t_ the values of all affix parameter instances in _n(S)_ visits of _t_ can be computed, where at the _i_-th visit of each subtree whose root is marked with _X_, exactly the corresponding instances of the affix parameters _A~i~(X)_ are evaluated. Thus an EAG for which there is such a visit-correct family of partitions, is a _("simple") multi-visit EAG_.
+
+In order to have at least one constructive criterion for deciding whether a given family of partitions is is visit-correct, an equivalent characterisation of multi-visit EAGs is given below. is given. Instead of specifying evaluation orders by total orders on _A(X)_ , the more appropriate concept of orientations is used. more appropriate concept of orientations is used, where an order is determined only between each inherited and each synthesised affix position. An _orientation_ of the symmetric product _A*B_ = _(A×B)_ ∪ _(B×A)_ for sets _A_ and _B_ is a relation _R_ ⊆ _A*B_, where for each _a_ ∈ _A_ and _b_ ∈ _B_. either _(a,b)_ ∈ _R_ or _(b,a)_ ∈ _R_ holds. In the following, a bijection between the _canonical partitions_ _(A~1~(X),...,A~n(X)~(X))_ of _A(X)_ where each _A~i~(X)_ is an inherited affix for _1≤i<n(X)_, and for _1<i≤n(X)_ a synthesised affix position, and the corresponding acyclic orientations of _I(X)_ * _S(X)_.
+
+Definition 5-1_(acyclic orientation)_::
+Let (A1(X),...,An(X)(X)) be an ordered partition of A(X) for X ∈ HN. Then +
+        DS(X) = {_(a,b)_ ∈ _I(X)_ × _S(X)_: -a_ ∈ _Ai(X)_ and _b_ ∈ _Aj(X)_ for _i≤j} ∪ +
+                {_(b,a)_ ∈ _S(X)_ × _I(X)_: _a_ ∈ _Ai(X)_ and _b_ ∈ _Aj(X)_ for _i>j} +
+the corresponding (acyclic) orientation of I(X) * S(X).
+
+Definition 5-2(Construction of a partition):
+Let DS(X) be an acyclic orientation of I(X) * S(X) for X ∈ HN. To this end, inductively construct the set
+B0(X) = ∅,
+B1(X) = { a ∈ S(X): there is no (a,b) ∈ DS(X)},
+Bi+1(X) = { a: for all (a,b) ∈ DS(X) there is b ∈ Bi(X) }
+is defined. Then there is a smallest number n(X) for which B2n(X)(X) = A(X) holds, and with.
+Ai(X) = B2(n(X)-i+1)(X) / B2(n(X)-i)(X), (A1(X),...,An(X)(X)) is the associated ordered partition of A(X).
+For the construction of the associated partition of A(X), the following always applies
+Ai(X) ∩ I(X) = B2(n(X)-i+1)(X) \ B2(n(X)-i)+1(X)
+Ai(X) ∩ I(X) = B2(n(X)-i)+1(X) \ B2(n(X)-i)(X),
 
 // -------------------------------------------------------------------------------
 // Page
