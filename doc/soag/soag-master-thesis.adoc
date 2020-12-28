@@ -365,7 +365,7 @@ VAR
 
 To calculate the SOAG property of a specification, each alternative of the initial data structure must be converted into an independent rule. The optional alternative and the repetition must be stored in their BNF equivalent form. All these rules are recorded in the `Rule` field. `SymOcc` refers to an area in the `SymOcc` field containing all symbol occurrences of a rule `AffOcc` refers to an area in the `AffOcc` field containing all affix parameters belonging to the rule.
 
-The connection to the output data structure of the EAG module is established by the RECORD field `Rule` in the type extension `EmptyRule` and by the RECORD field `Alt` in the type extension `OrdRule` (_ordinary rule_). These are necessary to enable access to the parameters and text positions of the rules. enable access to the parameters and text positions of the rules. The transformed rules are directly reflected in the data structure to be described. For a pictorial illustration of the data structure, I use the
+The connection to the output data structure of the EAG module is established by the RECORD field `Rule` in the type extension `EmptyRule` and by the RECORD field `Alt` in the type extension `OrdRule` (_ordinary rule_). These are necessary to enable access to the parameters and text positions of the rules. enable access to the parameters and text positions of the rules. The transformed rules are directly reflected in the data structure to be described. For a pictorial illustration of the data structure, I use the  
 
 // -------------------------------------------------------------------------------
 // Page
