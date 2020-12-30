@@ -492,7 +492,7 @@ is defined. Then there is a smallest number n(X) for which B2n(X)(X) = A(X) hold
 Ai(X) = B2(n(X)-i+1)(X) / B2(n(X)-i)(X), (A1(X),...,An(X)(X)) is the associated ordered partition of A(X).
 For the construction of the associated partition of A(X), the following always applies
 Ai(X) ∩ I(X) = B2(n(X)-i+1)(X) \ B2(n(X)-i)+1(X)
-Ai(X) ∩ I(X) = B2(n(X)-i)+1(X) \ B2(n(X)-i)(X),
+Ai(X) ∩ I(X) = B2(n(X)-i)+1(X) \ B2(n(X)-i)(X),  
 
 // -------------------------------------------------------------------------------
 // Page
