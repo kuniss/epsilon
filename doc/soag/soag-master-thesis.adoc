@@ -492,7 +492,65 @@ is defined. Then there is a smallest number n(X) for which B2n(X)(X) = A(X) hold
 Ai(X) = B2(n(X)-i+1)(X) / B2(n(X)-i)(X), (A1(X),...,An(X)(X)) is the associated ordered partition of A(X).
 For the construction of the associated partition of A(X), the following always applies
 Ai(X) ∩ I(X) = B2(n(X)-i+1)(X) \ B2(n(X)-i)+1(X)
-Ai(X) ∩ I(X) = B2(n(X)-i)+1(X) \ B2(n(X)-i)(X),  
+Ai(X) ∩ I(X) = B2(n(X)-i)+1(X) \ B2(n(X)-i)(X), 
+
+even if _DS(X)_ as below is only the transitive hull of a subset of an acyclic orientation _I(X) * S(X)_. In this case, _(A~1~(X),...,A~n(X)~(X))_ is called the _box partition belonging_ to _DS(X)_,  which is characterized by the fact that in a partition as short as possible each affix position is arranged as late as possible ("lazy"). ("lazy") in the shortest possible partition. The corresponding orientation is then called _box completion_. 
+
+It is easy to see that an EAG is a multi-visit EAG exactly if for every _X_ ∈ _HN_ there is an orientation _DS(X)_ of _I(X) * S(X)_ such that the extended dependencies.  
+
+_D^-1^_ ∪ {_(a^(r,i)^, b^(r,i)^)_: _(a,b)_ ∈ _DS(X^r^~i~)_}
+
+// -------------------------------------------------------------------------------
+// Page 30
+
+are acyclic. Thus, the decision problem of whether a given EAG is a multi-visit EAG is in NP, and furthermore Engelfriet and Filé have shown for attribute grammars <<EngFil>> that this problem is NP-complete.
+
+However, from the dependencies _D^-1^_, we can efficiently read a necessary condition that every visit-correct family of partitions must satisfy. For this purpose, all direct and resulting indirect dependencies between affix parameters of a symbol occurrence are transferred to all corresponding affix parameters of the same symbol.
+
+Definition 5-3 (_induced dependencies_):
+
+Let _DP_ be a relation on affix parameters. Then the induced dependencies are defined as the smallest relation defined as 
+    
+_ind(DP)_ = _DP_ ∪ {_(a^(q,j)^, b^(q,j)^)_: _(a^(r,i)^, b ^(r,i)^)_ ∈ _ind(DP)^+^_ for _X^r^~i~ = X^q^~j~_} 
+
+is satisfied, where _R^+^_ denotes the transitive hull of a relation _R_. 
+
+The induced dependences _IDP_ = _ind(D^-1^)_ reflect not only transitive dependences to the derivation trees, but also such arrangements, which result compellingly from the abstraction from the context of the symbols. The projection of _IDP_ onto _A(X)_ is denoted by _IDS(X)_, i.e. 
+
+_IDS(X)_ = {_(a,b)_ :_(a^(r,i)^_, _b^(r,i)^)_ ∈ _IDP_ for _X^r^~i~_ = X}, 
+
+and for any visit-correct family of partitions with associated orientations _DS(X)_, it follows that 
+
+_IDS(X)_ ∩ _(I(X) * S(X))_ ⊆ _DS(X)_. 
+
+Furthermore, for any multi-visit EAG IDP is acyclic. If this is the case, then for any _X_ ∈ _HN_, _IDS(X)_ is the transitive hull of a subset of an acyclic orientation of _I(X) * S(X)_. 
+
+From the given necessary condition, Kastens has determined in <<Kastens>> a subclass of multi-visit AGs for which a visit-correct family of partitions can be computed efficiently, and which is also very easily, as shown by Kutza <<Kutza>>, can be applied to EAGs. An EAG is exactly if _IDP_ is acyclic and the family of box partitions belonging to _IDS(X)_ is visit-correct.
+
+=== Sequentially orientable EAGs
+
+In the following, the OEAG method will now be modified to systematically determine larger subclasses of the multi-visit EAGs.
+
+The weakness of the OEAG method is that the partitions from _IDS(X)_ for _X_ ∈ _HN_ are determined independently of each other. To remedy this, Kastens in <<KaHuZi>> therefore outlined a more "careful" procedure, in which the family of partitions is formed symbol-wise and new induced dependencies are taken into account, which result from already determined partitions. Those multi-visit AGs for which this sequential procedure is successful are called "automatically arranged orderly". This approach of Kastens mainly makes a statement about the order of the symbols in the determination of a partition. This influence of the order will be in the foreground of the following the foreground of the further investigations.
+
+// -------------------------------------------------------------------------------
+// Page 31
+
+The example of an EAG shown in Figure 5-1 combines in two rules the dependencies of a "leftto-right threading" (a) and a "right-to-left threading" (b). According to Reps and Teitelbaum [RepTei] illustrate multi-visit AGs corresponding to this type of EAGs illustrate a practically relevant constellation in which the OAG procedure, and hence the OEAG procedure, fails. Since there is only one symbol in this case, the sequential method cannot be successful either. At this point the superiority of the c_oncept of orientations_. Every ordered partition of the set {_(X, {a}_*{b}): _a_ ∈ _I(X)_ and _b_ ∈ _S(X)_ for  _X_ ∈ _HN_} is an orientation sequence. An orientation sequence (C1,...,Cm) is trivial if _m_ = 1 holds, and _elementary_ if each set _C~j~_ contains only exactly one pair.
+
+Definition 5-4 (immediately successful orientation sequence):
+
+Let (C1,...,Cm) be an orientation sequence, then it is inductively defined as follows: initially holds IDP0 = IDP. For acyclic IDPj-1 with the partitions belonging to the boxes of {(a,b) :(a(r,i) , b(r,i)) ∈ IDPj-1 for Xri = X} belonging to orientations DSj(X) of I(X) * S(X) holds. 
+
+IDPj = ind(IDPj-1 ∪ {(a(r,i), b(r,i)): (a,b) ∈ DSj(X) for (X, {a}*{b}) ∈ Cj}). 
+
+Thus, the orientation sequence is immediately successful if each IDPj is acyclic for 0 ≤ j ≤ m. In this case, the projections of IDPm onto A(X), i.e. 
+
+DS(X) = {(a,b) :(a(r,i), b(r,i)) ∈ IDPm for Xri = X}, 
+
+acyclic orientations of I(X) * S(X), and the family of associated partitions is visit-correct. Clearly, an EAG is an OEAG if and only if the trivial orientation order is immediately is successful. Furthermore, then every orientation order is immediately successful, and it is easy to to see that for each DSj(X) the box partition coincides with the box partition of IDS(X). So, for each orientation order, the same visit-correct family of partitions is determined as in the OEAG procedure. In general, for any immediately successful orientation sequence, any finer orientation sequence in which each Cj is replaced by any ordered partition, is immediately successful. 
+
+The "more careful" procedure outlined by Kastens can now be characterized by the fact that for a fixed order (X1,...,Xm) of symbols the orientation order (C1,...,Cm) with Cj = {(Xj, {a}*{b}): a ∈ I(Xj) and b ∈ S(Xj)} is immediately successful. This is a symbol-wise orientation order, which is uniquely determined by the order of symbols.
 
 // -------------------------------------------------------------------------------
 // Page
