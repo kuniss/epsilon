@@ -538,9 +538,9 @@ The weakness of the OEAG method is that the partitions from _IDS(X)_ for _X_ ∈
 
 The example of an EAG shown in Figure 5-1 combines in two rules the dependencies of a "leftto-right threading" (a) and a "right-to-left threading" (b). According to Reps and Teitelbaum [RepTei] illustrate multi-visit AGs corresponding to this type of EAGs illustrate a practically relevant constellation in which the OAG procedure, and hence the OEAG procedure, fails. Since there is only one symbol in this case, the sequential method cannot be successful either. At this point the superiority of the c_oncept of orientations_. Every ordered partition of the set {_(X, {a}_*{b}): _a_ ∈ _I(X)_ and _b_ ∈ _S(X)_ for  _X_ ∈ _HN_} is an orientation sequence. An orientation sequence (C1,...,Cm) is trivial if _m_ = 1 holds, and _elementary_ if each set _C~j~_ contains only exactly one pair.
 
-Definition 5-4 (immediately successful orientation sequence):
+Definition 5-4 (_immediately successful orientation sequence_):
 
-Let (C1,...,Cm) be an orientation sequence, then it is inductively defined as follows: initially holds IDP0 = IDP. For acyclic IDPj-1 with the partitions belonging to the boxes of {(a,b) :(a(r,i) , b(r,i)) ∈ IDPj-1 for Xri = X} belonging to orientations DSj(X) of I(X) * S(X) holds. 
+Let _(C~1~,...,C~m~)_ be an orientation sequence, then it is inductively defined as follows: initially holds _IDP~0~_ = _IDP_. For acyclic _IDP~j-1~_ with the partitions belonging to the boxes of {_(a,b)_ : _(a^(r,i)^ , b^(r,i)^)_ ∈ _IDP~j-1~_ for _X^r^~i~_ = X} belonging to orientations _DS~j~(X)_ of _I(X) * S(X)_ holds. 
 
 IDPj = ind(IDPj-1 ∪ {(a(r,i), b(r,i)): (a,b) ∈ DSj(X) for (X, {a}*{b}) ∈ Cj}). 
 
