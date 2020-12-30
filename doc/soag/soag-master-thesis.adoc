@@ -542,15 +542,59 @@ Definition 5-4 (_immediately successful orientation sequence_):
 
 Let _(C~1~,...,C~m~)_ be an orientation sequence, then it is inductively defined as follows: initially holds _IDP~0~_ = _IDP_. For acyclic _IDP~j-1~_ with the partitions belonging to the boxes of {_(a,b)_ : _(a^(r,i)^ , b^(r,i)^)_ ∈ _IDP~j-1~_ for _X^r^~i~_ = X} belonging to orientations _DS~j~(X)_ of _I(X) * S(X)_ holds. 
 
-IDPj = ind(IDPj-1 ∪ {(a(r,i), b(r,i)): (a,b) ∈ DSj(X) for (X, {a}*{b}) ∈ Cj}). 
+_IDP~j~_ = _ind(IDP~j-1~_ ∪ {(_a_^(_r,i_)^, b^(r,i)^)_: (_a,b_) ∈ _DS~j~(X)_ for (_X_, {_a_}*{_b_}) ∈ _C~j~_}). 
+Thus, the orientation sequence is immediately successful if each _IDP~j~_ is acyclic for 0 ≤ _j- ≤ _m_. In this case, the projections of _IDP~m~_ onto _A(X)_, i.e. 
 
-Thus, the orientation sequence is immediately successful if each IDPj is acyclic for 0 ≤ j ≤ m. In this case, the projections of IDPm onto A(X), i.e. 
+_DS(X)_ = {(_a,b_) :_(-a_^(_r,i_)^, b^(_r,i_)^) ∈ _IDP~m~- for _X^r^~i~_ = X}, 
 
-DS(X) = {(a,b) :(a(r,i), b(r,i)) ∈ IDPm for X^Sri = X}, 
+acyclic orientations of _I(X) * S(X)_, and the family of associated partitions is visit-correct.
 
-acyclic orientations of I(X) * S(X), and the family of associated partitions is visit-correct. Clearly, an EAG is an OEAG if and only if the trivial orientation order is immediately is successful. Furthermore, then every orientation order is immediately successful, and it is easy to to see that for each DSj(X) the box partition coincides with the box partition of IDS(X). So, for each orientation order, the same visit-correct family of partitions is determined as in the OEAG procedure. In general, for any immediately successful orientation sequence, any finer orientation sequence in which each Cj is replaced by any ordered partition, is immediately successful. 
+Clearly, an EAG is an OEAG if and only if the trivial orientation order is immediately is successful. Furthermore, then every orientation order is immediately successful, and it is easy to to see that for each _DS~j~_(_X_) the box partition coincides with the box partition of _IDS(_X_). So, for each orientation order, the same visit-correct family of partitions is determined as in the OEAG procedure. In general, for any immediately successful orientation sequence, any finer orientation sequence in which each _C~j~_ is replaced by any ordered partition, is immediately successful. 
 
-The "more careful" procedure outlined by Kastens can now be characterized by the fact that for a fixed order (X1,...,Xm) of symbols the orientation order (C1,...,Cm) with Cj = {(Xj, {a}*{b}): a ∈ I(Xj) and b ∈ S(Xj)} is immediately successful. This is a symbol-wise orientation order, which is uniquely determined by the order of symbols.
+The "more careful" procedure outlined by Kastens can now be characterized by the fact that for a fixed order (X1,...,Xm) of symbols the orientation order (_C~1~,...,C~m~_) with _C~j~_ = {(_X~j~, {_a_}*{_b_}): _a_ ∈ _I(_X~j~_) and _b_ ∈ _S(_X_~j~_)} is immediately successful. This is a symbol-wise orientation order, which is uniquely determined by the order of symbols.
+
+Definition 5-5 (_successful orientation sequence_):
+
+Let (_C~1~,...,C~m~_) now be an elementary orientation sequence and let _IDP~j~_ and _DS~j~(_X_) be defined as before However, if _IDP~j~_ is cyclic, then instead it is defined with inverse dependencies: 
+
+_IDP~j~_ = _ind(_IDP~j-1~_ ∪ {(_b^(r,i)^_, _a^(r,i)^_): (_a,b_) ∈ -DS~j~_(_X~j~_) for (_X^r^~i~, {_a_}*{_b_}) = _C~j~_}). 
+
+The orientation sequence is _successful_ if again every _IDP~j~_ is acyclic for 0 ≤ _j_ ≤ _m_. 
+
+Obviously, any elementary orientation sequence that is immediately successful is successful,and so for any OEAG, any elementary orientation sequence is successful. Since the first alternative is always acyclic, we get the same visit-correct family of partitions as for the OEAG-
+
+// doc\soag\images\figure-5-1-one-left-to-right-threading-a-and-one-right-to-left-threading-b.PNG
+
+// -------------------------------------------------------------------------------
+// Page 32
+
+Procedures. On the other hand, it is easy to see that there are EAGs with successful orientation sequences, for which no orientation sequence is already directly successful.
+
+An EAG is a _sequentially orientable_ EAG (SOEAG) if there is a successful orientation sequence. orientation sequence exists. Thus, of course, every OEAG is a SOEAG, and every SOEAG is a multivisit EAG.
+
+=== Two heuristic subclasses of SOEAGs.
+
+Since the decision problem whether an EAG is a SOEAG is NP-complete, the implementation of a implementation of a SOEAG evaluator generator does not seem advisable. Instead, two useful heuristic subclasses of SOEAGs are presented, which are defined constructively, i.e., an algorithm for computing the orientation order is given and thus the subclass is defined.
+
+Starting from the OEAG method, considerations of easy and efficient implementability hardly allow any other reasonable decision than with respect to the pursued orientation strategy in principle symbol-wise, namely in an arbitrary ad hoc order (_X~1~,...,X~k~_) of the symbols _X_∈ _HN_. To this end, the following two degrees of refinement of increasing power are conceivable:
+
+1. the orientation order (_C~1~,...,C~m~_) with _C~j~_ = {(_X_, {_a_}*{_b_}): _a_ ∈ _I_(_X_) and _b_ ∈ _S_(_X_) for _X_ ∈ _HN_}is refined to an elementary refined one, i.e., for each symbol _X~i~_ a partition of one-element sets is formed. Each of these sets is assigned to a _C~j~_ in ascending order. The success of each orientation is immediately checked. However, in case of failures, backtracking is omitted for efficiency reasons. Only the immediate success of one ad hoc order per symbol is checked instead of all its permutations. are checked. This approach is called the (ad hoc) ESO method (ad hoc elementary symbol sequentially orienting) and approximates the first heuristic grammar subclass to be presented.
+
+2. the same strategy is slightly more complicated to implement when checking for a successful rather than an immediately successful orientation sequence. This may require the undoing of extensions in the dependency graph of the affix parameters of a rule, which in the worst case leads to an increased effort. This procedure is called (ad hoc) ESOB procedure (ad hoc elementary symbol sequentially orienting with local backtracking) and describes by construction the second, more powerful grammar subclass.
+
+It should be emphasized again that, given a multi-visit EAG that is not ordered, the successful generation of an evaluator depends on the ad hoc chosen orders _and_ the fineness of the procedure. If one procedure fails, then a procedure proceeding with the same order can be more finely, but also a different order can lead to the successful generation of an evaluator. In any case all procedures on OEAGen are successful.
+
+It is easy to see that an implementation for the approximation of the second more powerful grammar subclass would also compute the grammars of the first subclass. In the revised version of <<KröpKann>>, the two grammar subclasses, as well as the two procedures describing them constructively ESO and ESOB, are no longer explicitly mentioned. Instead, only a SOAGen or SOEAGen _approximating_ procedure. I agree with this point of view and will from now on only speak of one method without referencing the two grammar subclasses mentioned.
+
+=== Dynamic transitive envelope
+
+The dependencies between the affix parameters of a rule induced by the affix forms are held in the data structure TDP. This data structure is also used to store the transitive closed intermediate results IDPj+ where at the j-th orientation step IDPj+ is calculated from IDPj-1+ is calculated in situ. The data structure TDP is implemented in the present evaluator generator in the module SOAG as a data element of the data structure RuleDesc in the field Rule.
+
+For the expenditure of the approximating procedure for the generation of SOEAG evaluators is formative the algorithm used for the transitive extension of the relation TDP, whereby always only dependencies between affix parameters of the same rule. In the following, in formal notation, an efficient algorithm of Ibaraki and Katoh for the incremental transitive hulling of a monotonically growing relation is presented.
+
+// -------------------------------------------------------------------------------
+// Page 33
+
 
 
 // -------------------------------------------------------------------------------
