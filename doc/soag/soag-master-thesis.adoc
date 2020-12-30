@@ -552,6 +552,7 @@ acyclic orientations of I(X) * S(X), and the family of associated partitions is 
 
 The "more careful" procedure outlined by Kastens can now be characterized by the fact that for a fixed order (X1,...,Xm) of symbols the orientation order (C1,...,Cm) with Cj = {(Xj, {a}*{b}): a ∈ I(Xj) and b ∈ S(Xj)} is immediately successful. This is a symbol-wise orientation order, which is uniquely determined by the order of symbols.
 
+
 // -------------------------------------------------------------------------------
 // Page
 
