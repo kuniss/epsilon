@@ -546,7 +546,7 @@ IDPj = ind(IDPj-1 ∪ {(a(r,i), b(r,i)): (a,b) ∈ DSj(X) for (X, {a}*{b}) ∈ C
 
 Thus, the orientation sequence is immediately successful if each IDPj is acyclic for 0 ≤ j ≤ m. In this case, the projections of IDPm onto A(X), i.e. 
 
-DS(X) = {(a,b) :(a(r,i), b(r,i)) ∈ IDPm for Xri = X}, 
+DS(X) = {(a,b) :(a(r,i), b(r,i)) ∈ IDPm for X^Sri = X}, 
 
 acyclic orientations of I(X) * S(X), and the family of associated partitions is visit-correct. Clearly, an EAG is an OEAG if and only if the trivial orientation order is immediately is successful. Furthermore, then every orientation order is immediately successful, and it is easy to to see that for each DSj(X) the box partition coincides with the box partition of IDS(X). So, for each orientation order, the same visit-correct family of partitions is determined as in the OEAG procedure. In general, for any immediately successful orientation sequence, any finer orientation sequence in which each Cj is replaced by any ordered partition, is immediately successful. 
 
