@@ -590,7 +590,7 @@ It is easy to see that an implementation for the approximation of the second mor
 
 The dependencies between the affix parameters of a rule induced by the affix forms are held in the data structure TDP. This data structure is also used to store the transitive closed intermediate results IDPj+ where at the j-th orientation step IDPj+ is calculated from IDPj-1+ is calculated in situ. The data structure TDP is implemented in the present evaluator generator in the module SOAG as a data element of the data structure RuleDesc in the field Rule.
 
-For the expenditure of the approximating procedure for the generation of SOEAG evaluators is formative the algorithm used for the transitive extension of the relation TDP, whereby always only dependencies between affix parameters of the same rule. In the following, in formal notation, an efficient algorithm of Ibaraki and Katoh for the incremental transitive hulling of a monotonically growing relation is presented.
+For the expenditure of the approximating procedure for the generation of SOEAG evaluators is formative the algorithm used for the transitive extension of the relation TDP, whereby always only dependencies between affix parameters of the same rule. In the following, in formal notation, an efficient algorithm of Ibaraki and Katoh for the incremental transitive hulling of a monotonically growing relation is presented.  
 
 // -------------------------------------------------------------------------------
 // Page 33
