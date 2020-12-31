@@ -542,10 +542,10 @@ Definition 5-4 (_immediately successful orientation sequence_):
 
 Let _(C~1~,...,C~m~)_ be an orientation sequence, then it is inductively defined as follows: initially holds _IDP~0~_ = _IDP_. For acyclic _IDP~j-1~_ with the partitions belonging to the boxes of {_(a,b)_ : _(a^(r,i)^ , b^(r,i)^)_ ∈ _IDP~j-1~_ for _X^r^~i~_ = X} belonging to orientations _DS~j~(X)_ of _I(X) * S(X)_ holds. 
 
-_IDP~j~_ = _ind(IDP~j-1~_ ∪ {(_a_^(_r,i_)^, b^(r,i)^)_: (_a,b_) ∈ _DS~j~(X)_ for (_X_, {_a_}*{_b_}) ∈ _C~j~_}). 
+_IDP~j~_ = _ind(IDP~j-1~_ ∪ {(_a_^(_r,i_)^, b^(r,i)^): (_a,b_) ∈ _DS~j~(X)_ for (_X_, {_a_}*{_b_}) ∈ _C~j~_}). 
 Thus, the orientation sequence is immediately successful if each _IDP~j~_ is acyclic for 0 ≤ _j- ≤ _m_. In this case, the projections of _IDP~m~_ onto _A(X)_, i.e. 
 
-_DS(X)_ = {(_a,b_) :_(-a_^(_r,i_)^, b^(_r,i_)^) ∈ _IDP~m~- for _X^r^~i~_ = X}, 
+_DS(X)_ = {(_a,b_) :(_a_^(_r,i_)^, _b_^(_r,i_)^) ∈ _IDP~m~- for _X^r^~i~_ = X}, 
 
 acyclic orientations of _I(X) * S(X)_, and the family of associated partitions is visit-correct.
 
@@ -595,7 +595,77 @@ For the expenditure of the approximating procedure for the generation of SOEAG e
 // -------------------------------------------------------------------------------
 // Page 33
 
+Definition 5-6 (_incremental transitive hull_):
 
+Let _S_ be a finite set and _R_ ∪ {(_u,v_)} ⊆ _S^2^_. Then the operators + and * are given by
+            
+∅^+^ = ∅,
+
+(_R_ ∪ {(_u,v_)})+ = _R^+^_ ∪ {_x_ : _x R* u_} _×_ {_y_ : _v R* y_} and
+
+_R*_ = _R^+^_ ∪ {(_x,x_) : _x_ ∈ _S_}.
+
+It can be seen immediately that _R_ ∪{(_u,v_)}+ from _R+_ with the effort _O_(|_S_|^2^) can be determined. It is now, related to _R_ and (_u,v_), special predecessor and successor sets
+
+_P~R~_(_u,v_)= {_x_ : _x R* u_, but not _x R^+^ v_} and
+
+_S~R~_(_u,v_)={_x_ : _v R^+^ x_, but not _u R^+^ x_}
+
+is introduced. Thus, first tightening
+
+(_R_ ∪ {(_u,v_)})+ = _R^+^_ ∪ _P~R~_(_u,v_) × {_y_ : _v R* y_},  (1)
+
+and Ibaraki and Katoh show in <<IbaKat>> that such is the transitive extension of the initial relation R+ by successively adding q (new) relations (_u,v_) ∈ _S^2^_ cumulatively requires only an overhead of _O_(|_S_|^3^) is required. This can even be improved to _O_(_q_⋅|_S_|), as can be shown without difficulty. The key idea is that each newly added relation requires only |_S_|- instead of |_S_|^2^ -times. Consequently, the relation _R+_, starting at ∅, can be incrementally built up in _O_(|_S_|⋅|_R^+^_|) can be constructed. 
+
+Similarly, it is easy to show that the asymmetric algorithm (1) of Ibaraki and Katoh can be further extended to the symmetric algorithm 
+
+(_R_ ∪ {(_u,v_)})+ = _R^+^_ ∪ _P~R~_(_u,v_) × _S~R~_(_u,v_). 
+
+can be tightened. However, this improvement remains without consequence in the cumulative effort. 
+
+When the inductive computational scheme is transformed into a program, where the in question relation R+ is represented by an adjacency matrix, it is to be paid attention, the determination of the successor set _S~R~_(_u,v_), which requires the overhead θ(|_S_|), to be extracted so that the enumeration of _P~R~_(_u,v_) × _S~R~_(_u,v_) does not require effort θ(|_S_|_2_) to formulate. 
+
+The transitive extension of the relation _TDP_ is implemented in the `SOAGPartition`  module in the procedure `AddTDPTrans` implemented. In the first loop of the procedure, the list `NUV` is used to determine the successor set _S~R~_(_u,v_) is determined. The successor set can be implemented as a list, because each node is added at most once.  is added. In the second loop the enumeration of the relation _P~R~_(_u,v_) × _S~R~_(_u,v_) takes place, which forms the transitive termination in _TDP_. As required, both loops are not interleaved in order to comply with the effort described above.
+
+=== Dynamic topological sorting
+
+In this section, we present an algorithm that attempts to specify a successful orientation order in a single topological sort per symbol attempts to specify a successful orientation order. 
+
+Considering _TDP_ = _IDP~k-1~^+^ then for _X_ ∈ _HN_ the projections are 
+
+_DS_(_X_) = { (_a,b_) ∈ _I_(_X_) * _S_(_X_) : (_a^(r,i)^_}, _b_^(_r,i_)^) ∈ _TDP_ for _X^r^~i~_=X}
+
+in each case subset of an (acyclic) orientation of _I_(_X_) * _S_(_X_), which makes it a complete(acyclic) orientation to be extended. (This formulation of _DS_(_X_), which in contrast to the definition of section 5.1, proves to be more convenient for the algorithm to be developed).algorithm to be developed). In principle, these extensions are made symbol-wise, which is why in the following the consideration of a fixed _X_ ∈ _HN_ suffices. As already indicated, it is proceeded in such a way that in the case of a given OEAG orientations result which are box completions of _IDS_(_X_) for _X_ ∈ _HN_. Obviously, the starting point is therefore the technique related to topological sorting. technique for determining the box completions of the above projection _DS_(_X_). We perform for the _X_ ∈ _HN_ in question, we first introduce the following symmetric relation unor ⊆ _I_(_X_) * _S_(_X_), which contains the fraction of affix-pairs from _I_(_X_) * _S_(_X_) that is still to be oriented:
+
+_a unor b_ ⇔ _DS_(_X_) ∪ ({_a_} * {_b_}) = ∅.
+
+Setting an evaluation order between two affix positions _a,b_ ∈ _A_(_X_) with _a unor b_, and this with the preference to compute _a after b_, is abstractly described as a procedure call _orient_(_a,b,X, new_) with the
+
+// -------------------------------------------------------------------------------
+// Page 34
+
+output parameter new is formulated. In the following sketch of the effect of a call orient(a,b,X, new) one can see the retraction of the dependency (b, a) in favor of (a, b) can be seen, if a cycle is created by (b, a). arises.
+
+TDP' := TDP;
+
+TDP := ind(TDP' ∪ {(b(r,i),a(r,i)): Xri=X })+;
+IF TDP cyclic THEN
+
+TDP := ind(TDP' ∪ {(a(r,i),b(r,i)): Xri=X })+;
+
+IF TDP cyclic THEN HALT END
+
+END;
+
+new := {(a,b) ∈ I(X) * S(X): (a(r,i),b(r,i)) ∈ TDP \ TDP' for an Xri=X }
+
+After Termination obviously holds   
+
+new ∪ DS(X) = { (a,b) ∈ I(X) * S(X): (a(r,i),b(r,i)) ∈ TDP for an Xri=X }.
+
+It is clear that eventually new contains not only either (b,a) or (a,b), but also possibly other new induced evaluation sequences projected onto A(X). To track TDP, the relation DS(X) has to be extended accordingly by these new dependencies new, which in turn has repercussions on the topological sorting process. on the topological sorting process of DS(X). The intended algorithm can thus be characterized as a dynamic topological sorting of the projection DS(X), interleaved with the calculation of TDP and the computation of TDP and the checking of cycles.
+
+To derive the algorithm, a key intermediate result is described below: Let j ≥ 0 such that the computation of the quantities ∅ = B0(X) ⊆ B1(X) ⊆ ... ⊆ B2n(X)(X)=A(X) has already been completed up to and including Bj(X), since these sets initially have the properties  
 
 // -------------------------------------------------------------------------------
 // Page
