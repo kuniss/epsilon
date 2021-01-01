@@ -644,28 +644,71 @@ Setting an evaluation order between two affix positions _a,b_ ∈ _A_(_X_) with 
 // -------------------------------------------------------------------------------
 // Page 34
 
-output parameter new is formulated. In the following sketch of the effect of a call orient(a,b,X, new) one can see the retraction of the dependency (b, a) in favor of (a, b) can be seen, if a cycle is created by (b, a). arises.
+output parameter _new_ is formulated. In the following sketch of the effect of a call _orient_(_a,b,X, new_) one can see the retraction of the dependency (_b, a_) in favor of (_a, b_) can be seen, if a cycle is created by (_b, a_). arises.
 
-TDP' := TDP;
+_TDP'_ := _TDP_;
 
-TDP := ind(TDP' ∪ {(b(r,i),a(r,i)): Xri=X })+;
-IF TDP cyclic THEN
+_TDP_ := _ind_(_TDP'_ ∪ {(_b_^(_r,i_)^,_a_^(_r,i_)^): _X^r^~i~_=_X_ })^+^;
 
-TDP := ind(TDP' ∪ {(a(r,i),b(r,i)): Xri=X })+;
+IF _TDP_ cyclic THEN
 
-IF TDP cyclic THEN HALT END
+_TDP_ := _ind_(_TDP'_ ∪ {(_a_^(_r,i_)^,_b_^(_r,i_)^): _X^r^~i~_=_X_ })^+^;
+
+IF _TDP_ cyclic THEN HALT END
 
 END;
 
-new := {(a,b) ∈ I(X) * S(X): (a(r,i),b(r,i)) ∈ TDP \ TDP' for an Xri=X }
+_new_ := {(_a,b_) ∈ _I_(_X_) * _S_(_X_): (_a_^(_r,i_)^,_b_^(_r,i_)^) ∈ _TDP_ \ _TDP'_ for an _X^r^~i~_=_X_ }
 
 After Termination obviously holds   
 
-new ∪ DS(X) = { (a,b) ∈ I(X) * S(X): (a(r,i),b(r,i)) ∈ TDP for an Xri=X }.
+_new_ ∪ _DS_(_X_) = { (_a,b_) ∈ _I_(_X_) * _S_(_X_): (_a_^(_r,i_)^,_b_^(_r,i_)^) ∈ _TDP_ for an _X^r^~i~_=_X_ }.
 
-It is clear that eventually new contains not only either (b,a) or (a,b), but also possibly other new induced evaluation sequences projected onto A(X). To track TDP, the relation DS(X) has to be extended accordingly by these new dependencies new, which in turn has repercussions on the topological sorting process. on the topological sorting process of DS(X). The intended algorithm can thus be characterized as a dynamic topological sorting of the projection DS(X), interleaved with the calculation of TDP and the computation of TDP and the checking of cycles.
+It is clear that eventually _new_ contains not only either (_b,a_) or (_a,b_), but also possibly other new induced evaluation sequences projected onto _A_(_X_). To track _TDP_, the relation _DS_(_X_) has to be extended accordingly by these new dependencies _new_, which in turn has repercussions on the topological sorting process. on the topological sorting process of _DS_(_X_). The intended algorithm can thus be characterized as a dynamic topological sorting of the projection _DS_(_X_), interleaved with the calculation of _TDP_ and the computation of _TDP_ and the checking of cycles.
 
-To derive the algorithm, a key intermediate result is described below: Let j ≥ 0 such that the computation of the quantities ∅ = B0(X) ⊆ B1(X) ⊆ ... ⊆ B2n(X)(X)=A(X) has already been completed up to and including Bj(X), since these sets initially have the properties   
+To derive the algorithm, a key intermediate result is described below: Let j ≥ 0 such that the computation of the quantities ∅ = _B~0~_(_X_) ⊆ _B~1~_(_X_) ⊆ ... ⊆ _B~2n(X)~_(_X_)=_A_(_X_) has already been completed up to and including -B~j~_(_X_), since these sets initially have the properties
+
+_B~0~_(_X-) = ∅,
+
+_B~1~_(_X_) = { _a_ ∈ _S_(_X_): there is no (_a,b_) ∈ _DS_(_X_)} 
+
+and for _i_ < _j_
+
+_B~i+1~_(_X_) = { _a_: for all (_a,b_) ∈ _DS_(_X_) holds _b_ ∈ _B~i~_(_X_) }
+
+and since, moreover, because of the validity of
+
+{_b_: _a unor b_} = ∅ for all _a_ ∈ _B~j~_(_X_) (2)
+
+acyclic expansions of _DS_(_X_) remain without influence on the validity of these invariants. The set variable
+
+_cur- = { _a_ ∈ _A_(_X_) \ _B~i~_(_X_): for all (_a,b_) ∈ _DS_(_X_) _b_ ∈ _B~j~_(_X_) holds } (3)
+
+contains candidates for affixes new in _B~j+1~_(_X_) with respect to _B~j~_(_X_). (The computation of the sets _B~i~_(_X_) and also of _n_(_X_) is done only implicitly). Obviously now the validity of 
+
+{_b_: _a unor b_} = ∅ for all _a_ ∈ _cur_
+
+and consequently
+
+{_b_: _a unor b_} = ∅ for all _a_ ∈ _B~j+1~_(_X_) (4)
+
+in that for each affix position _a_ ∈ _cur_, for which evaluation sequences with respect to
+affix positions _b_ are unknown, these are now determined, whereby in each case the order to evaluate _a after b_ is preferred.
+
+Therefore, if we consider at this point (_a,b_) with _a_ ∈ _cur_ and _a unor b_ and extend _TDP_ by means of a call _orient_(_a,b,X, new_), then one has to investigate how the given invariants can be obtained if now _DS_(_X_) is successively extended by the new relations (_c,d_) ∈ _new_. Along with the statement
+
+_DS_(_X_) := _DS_(_X_) ∪ {(_c,d_)}
+
+goes first the correction of the relation unor according to the definition by
+
+_unor_ := _unor_ \ ({_c_}*{_d_}).
+
+Now, because of (2), it is clear that _DS_(_X_) restricted to attributes from _B~j~_(_X_) ∪ _cur_ is already an orientation, and (_c,d_) furthermore extends _DS_(_X_) acyclically. Therefore, it follows immediately that _c,d_ ∉ _B~j~_(_X_) and |{_c,d_} ∪ _cur_ | ≤ 1 holds. The invariant (3), violated only in the case _c_ ∈ _cur_, thus requires to remove _c_ from _cur_.
+
+// -------------------------------------------------------------------------------
+// Page 35
+
+
 
 // -------------------------------------------------------------------------------
 // Page
