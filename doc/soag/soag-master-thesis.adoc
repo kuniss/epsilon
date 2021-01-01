@@ -665,7 +665,7 @@ new ∪ DS(X) = { (a,b) ∈ I(X) * S(X): (a(r,i),b(r,i)) ∈ TDP for an Xri=X }.
 
 It is clear that eventually new contains not only either (b,a) or (a,b), but also possibly other new induced evaluation sequences projected onto A(X). To track TDP, the relation DS(X) has to be extended accordingly by these new dependencies new, which in turn has repercussions on the topological sorting process. on the topological sorting process of DS(X). The intended algorithm can thus be characterized as a dynamic topological sorting of the projection DS(X), interleaved with the calculation of TDP and the computation of TDP and the checking of cycles.
 
-To derive the algorithm, a key intermediate result is described below: Let j ≥ 0 such that the computation of the quantities ∅ = B0(X) ⊆ B1(X) ⊆ ... ⊆ B2n(X)(X)=A(X) has already been completed up to and including Bj(X), since these sets initially have the properties  
+To derive the algorithm, a key intermediate result is described below: Let j ≥ 0 such that the computation of the quantities ∅ = B0(X) ⊆ B1(X) ⊆ ... ⊆ B2n(X)(X)=A(X) has already been completed up to and including Bj(X), since these sets initially have the properties   
 
 // -------------------------------------------------------------------------------
 // Page
