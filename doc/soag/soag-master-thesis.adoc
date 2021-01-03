@@ -708,17 +708,118 @@ Now, because of (2), it is clear that _DS_(_X_) restricted to attributes from _B
 // -------------------------------------------------------------------------------
 // Page 35
 
-When extending DS(X) by all new dependencies (c,d) ∈ new, either (b,a) or (a,b) is included in DS(X)
-so that in any case a unor b is no longer valid; if (a,b) was included, then
-then even a ∉Bj+1(X). Thus, after treating all a, b with a unor b, cur = Bj+1(X) \ Bj(X), and it is true that
-in fact (4).
-Now j is (implicitly) increased and again (3) is ensured. This is done by a statement
-cur := leaves
-where the new quantities are defined as follows:
-leaves = { a ∈ A(X) \ (Bj(X) ∪ cur): deg(a)=0 },
-deg(a)=|DS(X)(a) \ Bj(X)| for all a ∈ A(X).
-How deg and leaves can be efficiently carried along is described in more detail in Section 5.6 "Implementation Details".
-in more detail.
+When extending _DS_(_X_) by all new dependencies (_c,d_) ∈ _new_, either (_b,a_) or (_a,b_) is included in _DS_(_X_) so that in any case _a unor b_ is no longer valid; if (_a,b_) was included, then even a ∉_B~j+1~_(_X_). Thus, after treating all _a, b_ with _a unor b_, _cur_ = _B~j+1~_(_X_) \ _B~j~_(_X_), and it is true that in fact (4). 
+
+Now _j_ is (implicitly) increased and again (3) is ensured. This is done by a statement 
+
+_cur_ := _leaves_ 
+
+where the new quantities are defined as follows: 
+
+_leaves_ = { _a_ ∈ _A_(_X_) \ (_B~j~_(_X_) ∪ _cur_): _deg_(_a_)=0 }, 
+
+_deg_(_a_)=|_DS_(_X_)(_a_) \ _B~j~_(_X_)| for all _a_ ∈ _A_(_X_). 
+
+How _deg_ and _leaves_ can be efficiently carried along is described in more detail in Section 5.6 "Implementation Details". in more detail.
+
+=== Implementation details
+
+At the beginning of every partition determination, all direct dependencies between the affix parameters of a rule _r_ must be entered in the dependency graph `SOAG.Rule[_r_]`. `TDP` this is done for all rules by the procedure `ComputeDP`. If an affix is used in the affix form of an applying affix parameter, the affix depends directly on the defining affix parameter, which contains the defining affix of the same name. Before determining the dependencies in a rule context, each affix occurring in the rule must be assigned to the affix parameter in whose affix form it occurs. must be assigned to each normally occurring affix. This assignment is done by the procedure `SetAffOccforVars` in the module-global field `VarBuf`, which contains the following data structure for each affix of a rule
+
+----
+TYPE
+    VarBufDesc = RECORD
+        AffOcc, Sym,
+        Num, VarInd: INTEGER
+    END;
+    OpenVarBuf = POINTER TO ARRAY OF VarBufDesc;
+
+VAR
+    VarBuf: OpenVarBuf;
+    NextVarBuf: INTEGER;
+----
+
+The `VarBuf` field is cleared and reused for each rule, since the information it contains will not be needed later. is no longer needed.
+
+For explaining the dependencies of an applying affix parameter, for each affix it contains the affix parameter of its defining affix must be known. The procedure `ComputeDefAffOcc` calculates for each affix variable of the current rule in the `SOAG.DefAffOcc` field, which is parallel to `EAG.Var`, the Affix parameter in which the defining affix of the affix variable is located. This is done by linear search in the `VarBuf` field. If no defining affix is found, a violation of the link-definiteness condition is present; an error message and the position of the undefined affix are output and the program is aborted.
+
+The procedure `ComputeAffixApplCnt` calculates for all affix variables the number of their applications in syntheses and comparisons. For this purpose the field `VarBuf` is searched linearly and for non-defining affixes and affixes in applying affix parameters, the value in the `AffixApplCnt` field is incremented accordingly. Additionally, for all comparisons to be performed in a rule r, edges are added to the data structure `SOAG.Rule[_r_]`. `DP`. These dependencies are not really present, but refer from affix parameters with defining affixes to affix parameters with affixes of the same name or affixes with the same name negated by "_#_". This additional information is used later in the optimization of the storage of affix variables. Before applying the procedure `ComputeAffixApplCnt` procedure, the `SOAG.DefAffOcc` data structure for the current rule must have been completely calculated for the current rule.
+
+After calculating the `SOAG.DefAffOcc` field, all direct dependencies are added to the dependency structure using the procedure `AddTDPTrans` into the dependency graph and the transitive completion is formed. All dependencies determined by `AddTDPTrans` are additionally stored by entry into the cellar memory
+
+// -------------------------------------------------------------------------------
+// Page 36
+
+`MarkedEdges` marked. In parallel to the calculation of _TDP_, all direct dependencies of a rule _r_ are dependencies of a rule _r_ are entered into the data structure `SOAG.Rule[_r_]`. `DP`.
+
+In the procedure `ComputeInducedTDP` all marked edges are successively removed from the cellar memory `MarkedEdges`. For each marked edge all transitive dependencies are computed and added to the dependency graph if they were not already included. All newly entered edges will be marked by adding them to the basement memory `MarkedEdges`. This procedure is repeated until the basement memory is empty. The termination of the loop is guaranteed by the finiteness of the transitive hull of a dependency graph.
+
+The procedure `orient` implements the abstract procedure _orient_ introduced in Section 5.5 "Dynamic topological sorting". abstract procedure orient. If the orientation of two affix positions in _TDP_ results in a cycle, then all previous extensions of _TDP_ must be undone before inserting the reverse dependency. must be undone before inserting the reverse dependency. For this the module-global variable ´`phase` must be set to `dynTopSort`. If this is the case, then during the transitive completion in AddTDPTrans by the procedure `AddTDPChange` in the ´ChangeBuf` field with the structure
+
+----
+TYPE
+ChangeBufDesc = RECORD
+RuleInd,
+AffOccInd1,
+AffOccInd2: INTEGER;
+END;
+OpenChangeBuf: POINTER TO ARRAY OF ChangeBufDesc;
+VAR
+ChangeBuf: OpenChangeBuf;
+NextChangeBuf: INTEGER;
+----
+
+all changes of the _TDP_ are recorded. These extensions can then be undone by the procedure `ResetTDPChanges` procedure. The set new returned by _orient_ is implemented in the variable `New` as a set of type `BSets`. Each entry in this set results in a pair of affix items:
+
+`_first element_ = _set entry DIV Separator_`
+
+`_second element_ = _set entry MOD separator_`
+
+The `separator` is calculated in the procedure `DynTopSort`. 
+
+The procedure `DynTopSortSym` implements the procedure for topological sorting motivated in section 5.5 "Dynamic topological sorting". for the topological sorting of the affix position dependencies of a symbol under the following conditions approaching a successful or immediately successful orientation. The algorithm starts with the initialization of the data structure `DS`.
+----
+TYPE
+    DS: POINTER TO ARRAY OF INTEGER;
+----
+It realizes for a symbol _X_ the set of acyclic orientations _DS_(_X_). Furthermore, since _DS_(_X_) ∩ _unor_ holds, the relation _unor_ is additionally integrated in the data structure `DS`. Since the orientations for all symbols independently and successively, the data structure `DS` can be reused for each symbol. can be reused for each symbol. For an entry in the field `DS` thus applies
+----
+DS[a][b] = element ⇔ (a, b) ∈ _DS_(_X_)
+DS[a][b] = nil ⇒ (a, b) ∉ _DS_(_X_)
+DS[a][b] = unor ⇔ a _unor_ b
+----
+During the computation of the relation _unor_, the field `Deg` is filled simultaneously, which contains for each affix positionc of the current symbol.
+
+Then, the two sets cur and leave are initialized, which are `cur` and `leave` from Section 5.5 "Dynamic topological sorting". Both sets are of type `ASets` in order to be able to delete elements with a constant effort.
+
+The actual topological sorting process is controlled by a REPEAT loop, which is executed until all is executed until all affix positions of the current symbol are assigned to a partition set. This condition occurs when the set `Cur` is empty, which corresponds to the termination condition of the loop. By
+
+// -------------------------------------------------------------------------------
+// Page 37
+
+the use of a REPEAT loop, the loop is run at least once, even if Cur is empty after initialization. After initialization Cur can be empty exactly if there are no synthesized- but only inherited- values in the partition An(X)(X) of a symbol X there are no synthesized but only inherited affix positions, i.e. B1(X) is empty.
+
+The partition sets computed in the implementation do not correspond completely to the theoretically produced reasons, the partition sets calculated in the implementation do not quite correspond to the theoretically derived ones. For the partition sets calculated in the implementation partition sets AIj(X) holds:
+
+AIj(X) = Bj(X) \ Bj-1(X),
+
+and the derived partition sets then result from
+
+Ai(X) = AI2(n(X)-i+1)(X) ∪ AI 2(n(X)-i)+1(X) with
+
+AI2(n(X)-i+1)(X) = Ai(X) ∩ I(X) and
+
+AI2(n(X)-i)+1(X) = Ai(X) ∩ S(X).
+
+Thus, the computed partition sets alternately contain only inherited or synthesized affixes.However, this does not further limit the implemented algorithm, since the sought partition sets, can be derived very easily, as stated above. In the following the partition sets are always the implementation-related partition sets are meant as partition sets. 
+
+In each loop pass in Cur implicitly exactly one partition set of the searched affix partition is calculated. All elements of the set Cur are potential candidates for this set. Since the affix positions in the set Cur are to be examined in an arbitrary, but fixed order, they are computed before the second loop, which contains the orientation call Orient, they are transferred to the list LastCur. The order of the elements is fixed. This is necessary, since due to the implementation of the set type ASets, changes in the sequence can result from deleting elements.
+
+After the orientation of all affix positions in Cur resp. the affix positions in unor relation to them, the partition affix positions, the partition number Part is incremented by one. All affix positions remaining in the set Cur affix positions now belong to a partition set. Each of these affix positions n ∈ Cur is stored in the SOAG.PartNum[n] data structure is assigned the current partition number. All incoming edges that refer to these affix positions are deleted in the Deg field by decrementing. If there are no affix positions for one of the affix positions, which originally referred to affix positions from Cur, there are no more outgoing edges, so it is included in the Leave set.
+
+At the end of the REPEAT loop, Cur results from Leave, Leave is emptied, and the sorting process continues with the calculation of the next partition set until Cur is empty.
+
+The membership of an affix position to a partition set is modeled by the partition number in the field SOAG.PartNum. After completion of the topological sorting process all affix positions of a partition set of a partition set have the same partition number.
 
 // -------------------------------------------------------------------------------
 // Page
