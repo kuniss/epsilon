@@ -708,7 +708,17 @@ Now, because of (2), it is clear that _DS_(_X_) restricted to attributes from _B
 // -------------------------------------------------------------------------------
 // Page 35
 
-
+When extending DS(X) by all new dependencies (c,d) ∈ new, either (b,a) or (a,b) is included in DS(X)
+so that in any case a unor b is no longer valid; if (a,b) was included, then
+then even a ∉Bj+1(X). Thus, after treating all a, b with a unor b, cur = Bj+1(X) \ Bj(X), and it is true that
+in fact (4).
+Now j is (implicitly) increased and again (3) is ensured. This is done by a statement
+cur := leaves
+where the new quantities are defined as follows:
+leaves = { a ∈ A(X) \ (Bj(X) ∪ cur): deg(a)=0 },
+deg(a)=|DS(X)(a) \ Bj(X)| for all a ∈ A(X).
+How deg and leaves can be efficiently carried along is described in more detail in Section 5.6 "Implementation Details".
+in more detail.
 
 // -------------------------------------------------------------------------------
 // Page
