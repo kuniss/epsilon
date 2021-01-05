@@ -797,29 +797,68 @@ The actual topological sorting process is controlled by a REPEAT loop, which is 
 // -------------------------------------------------------------------------------
 // Page 37
 
-the use of a REPEAT loop, the loop is run at least once, even if Cur is empty after initialization. After initialization Cur can be empty exactly if there are no synthesized- but only inherited- values in the partition An(X)(X) of a symbol X there are no synthesized but only inherited affix positions, i.e. B1(X) is empty.
+the use of a REPEAT loop, the loop is run at least once, even if `Cur` is empty after initialization. After initialization `Cur` can be empty exactly if there are no synthesized- but only inherited- values in the partition _A~n(X)_~(_X_) of a symbol _X_ there are no synthesized but only inherited affix positions, i.e. _B~1~_(_X_) is empty.
 
-The partition sets computed in the implementation do not correspond completely to the theoretically produced reasons, the partition sets calculated in the implementation do not quite correspond to the theoretically derived ones. For the partition sets calculated in the implementation partition sets AIj(X) holds:
+The partition sets computed in the implementation do not correspond completely to the theoretically produced reasons, the partition sets calculated in the implementation do not quite correspond to the theoretically derived ones. For the partition sets calculated in the implementation partition sets _A^I^~j~_(_X_) holds:
 
-AIj(X) = Bj(X) \ Bj-1(X),
+_A^I^~j~_(_X_) = _B~j~_(_X_) \ _B~j-1~_(_X_),
 
 and the derived partition sets then result from
 
-Ai(X) = AI2(n(X)-i+1)(X) ∪ AI 2(n(X)-i)+1(X) with
+_A~i~_(_X_) = _A^I^~_2(n(X)-i+1)_~(_X_) ∪ _A^I^_~_2(n(X)-i)+1_~(X) with
 
-AI2(n(X)-i+1)(X) = Ai(X) ∩ I(X) and
+_A^I^~_2(n(X)-i+1)_~(_X_) = _A~i~_(_X_) ∩ _I_(_X_) and
 
-AI2(n(X)-i)+1(X) = Ai(X) ∩ S(X).
+_A^I^~_2(n(X)-i+1)_~(_X_) = _A~i~_(_X_) ∩ _S_(_X_).
 
 Thus, the computed partition sets alternately contain only inherited or synthesized affixes.However, this does not further limit the implemented algorithm, since the sought partition sets, can be derived very easily, as stated above. In the following the partition sets are always the implementation-related partition sets are meant as partition sets. 
 
-In each loop pass in Cur implicitly exactly one partition set of the searched affix partition is calculated. All elements of the set Cur are potential candidates for this set. Since the affix positions in the set Cur are to be examined in an arbitrary, but fixed order, they are computed before the second loop, which contains the orientation call Orient, they are transferred to the list LastCur. The order of the elements is fixed. This is necessary, since due to the implementation of the set type ASets, changes in the sequence can result from deleting elements.
+In each loop pass in `Cur` implicitly exactly one partition set of the searched affix partition is calculated. All elements of the set `Cur` are potential candidates for this set. Since the affix positions in the set `Cur` are to be examined in an arbitrary, but fixed order, they are computed before the second loop, which contains the orientation call `Orient`, they are transferred to the list `LastCur`. The order of the elements is fixed. This is necessary, since due to the implementation of the set type `ASets`, changes in the sequence can result from deleting elements.
 
-After the orientation of all affix positions in Cur resp. the affix positions in unor relation to them, the partition affix positions, the partition number Part is incremented by one. All affix positions remaining in the set Cur affix positions now belong to a partition set. Each of these affix positions n ∈ Cur is stored in the SOAG.PartNum[n] data structure is assigned the current partition number. All incoming edges that refer to these affix positions are deleted in the Deg field by decrementing. If there are no affix positions for one of the affix positions, which originally referred to affix positions from Cur, there are no more outgoing edges, so it is included in the Leave set.
+After the orientation of all affix positions in `Cur` resp. the affix positions in _unor_ relation to them, the partition affix positions, the partition number `Part` is incremented by one. All affix positions remaining in the set `Cur` affix positions now belong to a partition set. Each of these affix positions _n_ ∈ `Cur` is stored in the `SOAG.PartNum[_n_]` data structure is assigned the current partition number. All incoming edges that refer to these affix positions are deleted in the `Deg` field by decrementing. If there are no affix positions for one of the affix positions, which originally referred to affix positions from `Cur`, there are no more outgoing edges, so it is included in the `Leave` set.
 
-At the end of the REPEAT loop, Cur results from Leave, Leave is emptied, and the sorting process continues with the calculation of the next partition set until Cur is empty.
+At the end of the REPEAT loop, `Cur` results from `Leave`, `Leave` is emptied, and the sorting process continues with the calculation of the next partition set until `Cur` is empty.
 
-The membership of an affix position to a partition set is modeled by the partition number in the field SOAG.PartNum. After completion of the topological sorting process all affix positions of a partition set of a partition set have the same partition number. 
+The membership of an affix position to a partition set is modeled by the partition number in the field `SOAG.PartNum`. After completion of the topological sorting process all affix positions of a partition set of a partition set have the same partition number. 
+
+===  Implementations
+
+// -------------------------------------------------------------------------------
+// Page 45 
+
+=== Calculation of the visit sequences
+
+This chapter describes how to construct the visit sequences for the evaluator rules of a SOAG.
+are constructed.
+
+=== Visit sequences
+
+For each node _k_ of a derivation tree to which the rule _r_ has been applied, the visit sequence _VS~r~_ represents a local traversal rule. It describes the order in which the sons of node _k_ have to be visited and when to ascend to the parent node. Implicit in the visit sequences is the order in which the affix parameters are evaluated, because before each visit of a node, the instances of applying affix parameters needed during the visit must be synthesized. must be synthesized. After the visit, newly calculated instances of defining affix parameters must be must be analyzed. All instances of defining affix parameters of a node _k_ are computed in the upper context of _k_, those of its sons in the lower context of the respective son. From the point of view of node _k_, for the compute these instances, there must be an ascent to the father node or a visit to the son. The instances of defining affix parameters of predicates are computed by calling the predicate. Therefore, the content of visit sequences results in three types of _instructions_:
+
+1. _VISIT_(_X~i~^r^, n_) indicates the _n_-th visit of the symbol occurrence _X~i~_ in rule _r_,
+2. _LEAVE_(_n_) indicates the _n_-th ascent to the parent node,
+3. _CALL_(_X_) indicates the invocation of a predicate _X_.
+
+To map affix parameters to instructions, the _MAP_VS_ function is defined.
+
+MAP_VS(a(r,i)) :=
+
+[cols="1,4"]
+|===
+
+|VISIT(Xir, n)
+|if a(r,i) ∈ APD(r), i>0 and a(r,i) ∈ An(X) with X= Xir and X ist a basic nonterminal; or
+
+|LEAVE(n)
+|if a(r,i) ∈ APD(r), i=0 and a(r,i) ∈ An(X) with X= Xir and X ist a basic nonterminal; or
+
+|CALL(X)
+|if a(r,i) ∈ APD(r), i>0 and with X=Xir is X a pridcate nonterminal; or
+
+|NOP
+|else (no instruction).
+|===
+
 
 // -------------------------------------------------------------------------------
 // Page
