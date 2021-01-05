@@ -819,7 +819,7 @@ After the orientation of all affix positions in Cur resp. the affix positions in
 
 At the end of the REPEAT loop, Cur results from Leave, Leave is emptied, and the sorting process continues with the calculation of the next partition set until Cur is empty.
 
-The membership of an affix position to a partition set is modeled by the partition number in the field SOAG.PartNum. After completion of the topological sorting process all affix positions of a partition set of a partition set have the same partition number.
+The membership of an affix position to a partition set is modeled by the partition number in the field SOAG.PartNum. After completion of the topological sorting process all affix positions of a partition set of a partition set have the same partition number. 
 
 // -------------------------------------------------------------------------------
 // Page
