@@ -851,13 +851,13 @@ MAP_VS(a(r,i)) :=
 
 |LEAVE(n)
 |if a(r,i) ∈ APD(r), i=0 and a(r,i) ∈ An(X) with X= Xir and X ist a basic nonterminal; or
-
+b
 |CALL(X)
 |if a(r,i) ∈ APD(r), i>0 and with X=Xir is X a pridcate nonterminal; or
 
 |NOP
 |else (no instruction).
-|===
+|=== 
 
 
 // -------------------------------------------------------------------------------
