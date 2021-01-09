@@ -958,11 +958,11 @@ to calculate the sets of inheritedAffixpositions before and after each visit (CA
 
 _EVS~r~^i^_ = _AI~i~_(_Y~0~r^^_) _AI~j1~_(_X~1~_) _VISIT_(_X~1~, j~1~_) _AS~j1~_(_X~1~_) ... AIjk(Xk) VISIT(Xk, jk) ASjk(Xk) ASi(Y0r) LEAVE(i)
 
-The plans EVS~r~^i^_ become an extended visit sequence 
+The plans _EVS~r~^i^_ become an extended visit sequence 
 
 _EVS~r~_ = _EVS~r~^0^ EVS~r~^n(X)_^ with _X_ = _X~0~^r^_ 
 
-summarised. Note that each affix parameter ak(r,j) of the rule r is an element of exactly one set in EVSr which is defined by setr(ak(r,j)) uniquely. For two elements u and v of the extended visit sequence EVSr, a relation "<" is now defined so that u<v applies if u precedes v in the sequence EVSr. Analogously the relation "≤" is defined.
+summarised. Note that each affix parameter _a~k~_^(_r_,_j_)^ of the rule _r_ is an element of exactly one set in _EVS~r~_ which is defined by _set~r~_(_ak_^(_r_,_j_)^) uniquely. For two elements _u_ and _v_ of the extended visit sequence _EVS~r~_, a relation "<" is now defined so that _u_<_v_ applies if _u_ precedes _v_ in the sequence _EVS~r~_. Analogously the relation "≤" is defined.
 
 // -------------------------------------------------------------------------------
 // Page 53
