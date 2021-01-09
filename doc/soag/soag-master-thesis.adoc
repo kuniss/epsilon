@@ -859,6 +859,113 @@ b
 |else (no instruction).
 |=== 
 
+The partition (_A~1~_(_X_),...,_A~n(X)_~(_X_)) found for the affix positions of a symbol _X_ shows the order in which the affix positions must be calculated. order the affix positions have to be calculated. If a partition set _A~i~_(_X_) contains more than one affix positions, their order of calculation can be chosen arbitrarily. In the dependency graphs of the rules with symbol occurrences of _X_, additional dependencies between the affix parameters of the symbol occurrence _X_ are entered in such a way that the calculation sequence is thereby manifested. The application of the function _MAP_VS_ to the topologically sorted affix parameters of a rule yields a list of instructions.  of instructions. After adding some final instructions and eliminating duplicate instructions from this list, the result is instructions from this list, the visit sequence of a rule results. 
+
+The visit sequence of an evaluator rule r is constructed as follows: Let _a~1~_^(_r_)^..._a~k~_^(_r_)^ be a topological sorting of the graph (_AP_~(_r_)~,_IDP~m~_(_r_)) with _k_=|_AP_(_r_)| to a orientation sequence (_C~1~_,...,_C~m~_), then the visit sequence _VS~r~_ arises from the sequence
+
+_MAP_VS_(_a~1~_^(_r_)^)... _MAP_VS_(_a~k~_^(_r_)^) _INSTR_(_X~i~^r^_)..._INSTR_(_X^r^~#S(r_)~) _INSTR_(_X~0~^r^_),
+
+where duplicate instructions are deleted.
+
+Definition 6-2 (INSTR):
+VISIT(Xi
+r
+, n(X)) if i>0 and Xi
+r
+=X is a basic non-terminal; or
+INSTR(Xi
+r
+) := LEAVE(n(X)), if i=0 and Xi
+r
+=X is a basic non-terminal; or
+CALL(X), if i>0 and Xi
+r
+=X is a predicate nonterminal; or
+NOP, else.
+
+The final instructions ensure that the traversal of the derivation tree is complete and that all affix parameters are calculated. and that all affix parameters are calculated. 
+
+Each visit sequence _VS~r~_ can be divided into _n_(_X_) parts _VS~r~^1^_, ...,_VS~r~^n(X)_^ where _X_=_X~0~^r^_ holds. Each _VS~r~^i^_ ends with _LEAVE_(_i_) and is called a _plan_.
+
+// -------------------------------------------------------------------------------
+// Page 46
+
+=== Implementation details
+
+The procedure `ComputeVisitNo` calculates the visit number for each affix position from its affiliation to a partition set whose index is stored in the data structure `SOAG.PartNum`. Since the partition sets are available in reverse order, the following formula results for the calculation of the visit number the following formula 
+
+(_MaxPart_ + 1) DIV 2 - (_PartNum_ + 1) DIV 2 + 1
+
+`MaxPart` is the maximum index of a partition set of a symbol. The calculated visit number is again in the data structure `SOAG.PartNum`, since its content is no longer needed. Since the name and content of the data structure no longer match after the calculation of the visit numbers, the functions `GetVisitNo` and `GetMaxVisitNo` have been defined as interface functions for accessing the `SOAG.PartNum`. The first returns the visit number of an affix parameter, the second the maximum visit number of a symbol occurrence. visit number of a symbol occurrence. Both functions are exported.
+
+The functions `MapVS` and `CompleteTraversal` implement the functions `MAP_VS` and `INV_VS` described in section 6.1 "Visit sequences". `MAP_VS` and _INSTR_ respectively. Both functions return instructions of the type `instruction`, which are defined in the `SOAG`  module.
+
+The function `TopSort` implements the topological sorting of all affix parameters of a rule. It uses The iterative algorithm of K.Mehlhorn is used, as it is described in <<Mehlhorn>>. The two global variables
+
+----
+VAR
+    InDeg: SOAG.OpenInteger;
+    ZeroInDeg: Stacks.Stack;
+----
+
+are used to store intermediate results and to control the topological sorting process. `InDeg` contains the number of incoming edges for all affix parameters of the current rule. `ZeroInDeg` contains all affix parameters that have no incoming edges. After initialisation `ZeroInDeg` contains all affix parameters that must be evaluated first. These are removed one after the other from the set `ZeroInDeg` and transferred into the visit sequence using the `MapVS` function. For transferred, the edges that go out from them and go into other affix parameters are deleted for all transferred affix parameters by decrementing the field `InDeg` of the corresponding affix parameter. is decremented. If such an affix parameter also has no more incoming edges, i.e. if the field `InDeg` is zero, it is transferred to the set `ZeroInDeg`, which is implemented as a stack. This is continued until `ZeroInDeg` is empty. The calculated visit sequences for each rule are one after the other in the field `VS` of the module `SOAG`. The beginning and end of the visit sequence of a rule R are contained in the substructure `VS` of the type `EAG.ScopeDesc` of the field element `Rule[R]` in the same module contained. 
+
+In order to retrieve a visit instruction, the functions `GetVisit` and `GetNextVisit` have been defined. They each return the number of the passed visit instruction from the `SOAG.VS` list of a rule and are also exported. rule and are also exported.
+
+=== Hash Table for Elimination of Duplicate Instructions
+
+In order to eliminate duplicate instructions in the visit sequence of an evaluator rule, all instructions are  are additionally entered into a hash table. Before a new instruction is entered into the visit sequence, it is it is checked whether the instruction is already contained in the hash table. If this is the case, the current instruction is discarded, thus avoiding duplicate instruction occurrences.
+
+To determine the access addresses in the hash table, the double hashing procedure was implemented. (double hashing) has been implemented. This involves the use of two hash functions _f_ and _g_ and the following rule for the calculation of a fallback address in case of collision for an element _i_ and a table of the length _m_:
+
+_a~j~_(_i_) = (_f_(_i_) - (_j-1_)*_g_(_i_)) _mod m_
+
+The length of the table is calculated with _m_=_2^k^_ and _k_=_1+log~2~max_{|_AP_(_r_)|: _r_ is evaluator rule} is always fixed to a multiple of 2 and the function _g_ with
+
+_g_ = (_f_(_i_) _div_ 2) * 2 + 1
+
+// -------------------------------------------------------------------------------
+// Page 47
+
+always maps to odd numbers. This ensures that the list of alternate addresses is really a permutation. addresses is really a permutation, i.e. the alternate addresses are not repeated. 
+
+With a table load of less than 50%, which is always the case with the above table size, the average collision depths to be expected with equally distributed _f_(i) are, according to <<COMA>> p.90, less than 1.5. The implemented function _f_ does not produce absolutely equally distributed values, but it is sufficient for the required purpose. purpose, so that the average collision depths to be expected are unlikely to be greater than 1.5. 
+
+=== Implementations
+
+// -------------------------------------------------------------------------------
+// Page 52
+
+=== Optimisation of affix variable storage
+
+During the evaluation of a decorated derivation tree of an EAG, the instances of all affix positions are computed one after the other in the form of their affix variables and must be available in the memory, as the syntheses of other affix positions can refer to them. The storage of the affix position instances takes up a lot of space, and efforts are therefore being made to find an optimisation for this. 
+
+In the following, the approach of Engelfriet and de Jong is presented. In [EngJong] they present a polynomial algorithm that decides for multi-visit AGs whether an attribute can be implemented as a basement store. can be implemented. Transferring this approach to EAGs does not pose any problems, as was the case with the SOAG method. In addition, a variant of the algorithm can determine whether in a can only contain one value in a basement memory of an affix position and therefore the use of a global variable is indicated.
+
+The optimisation conditions presented in <<EngJong>> refer to affix positions of symbols. The data structure concept of the generated compilers, which will be presented in the following chapter, uses global variables for affix positions anyway. global variables (or a global field of variables) for affix positions anyway. Central object of semantic calculations are the affix variables of each rule. However, as is easily can be easily seen, each affix variable has the same optimisation properties as the affix position to which the affix parameter in which the affix is defined. For this reason, the properties calculated for this reason, the properties calculated for affix positions can be used to optimise affix variable storage.
+
+A further refinement of the approach presented here with regard to the affix variables of each rule is conceivable. In doing so, one could assume that the affix variables of a rule possess optimisation properties, independent of the affix variables of other rules, whereas in the approach to be presented an in one rule affects the optimisation properties of the affix variables of all other rules with the same symbol occurrence. rules with the same symbol occurrence. This possibility of refinement will not be further investigated further.
+
+=== Optimisation through basement storage
+
+One possibility for optimisation is to use cellar storage for affix positions that meet certain conditions, cellar storage for affix positions that meet certain conditions, a separate cellar storage for each affix position. An instance of such an affix position would be placed in the basement memory after it has been calculated, and after the calculation of the instance that depends on it, it would be removed from there. In this way, the value of the instance is only the shortest possible period of time.
+
+First, each plan _VS~r~^i^_ of the visit sequence of a rule _r_ 
+
+_VS~r~^i^_ = _VISIT_(_X~1~, j~1~_) ... _VISIT_(_X~k~, j~k~_) _LEAVE_(_i_)
+
+to calculate the sets of inheritedAffixpositions before and after each visit (CALL's are abstracted here) _AI~l~(_X_) = {_a~k~^(r,j)^_ : a~k~^X^ ∈ _A~l~_(_X)_ ∩ _I_(_X_) with _X_ = _X~j~^r^_ } and synthesised affix positions _ASl_(_X_) = {_a~k~^(r,j)^_ : a~k~^X^ ∈ _A~l~_(_X)_ ∩ _S_(_X_) with _X_ = _X~j~^r^_ } extended:
+
+_EVS~r~^i^_ = _AI~i~_(_Y~0~r^^_) _AI~j1~_(_X~1~_) _VISIT_(_X~1~, j~1~_) _AS~j1~_(_X~1~_) ... AIjk(Xk) VISIT(Xk, jk) ASjk(Xk) ASi(Y0r) LEAVE(i)
+
+The plans EVS~r~^i^_ become an extended visit sequence 
+
+_EVS~r~_ = _EVS~r~^0^ EVS~r~^n(X)_^ with _X_ = _X~0~^r^_ 
+
+summarised. Note that each affix parameter ak(r,j) of the rule r is an element of exactly one set in EVSr which is defined by setr(ak(r,j)) uniquely. For two elements u and v of the extended visit sequence EVSr, a relation "<" is now defined so that u<v applies if u precedes v in the sequence EVSr. Analogously the relation "≤" is defined.
+
+// -------------------------------------------------------------------------------
+// Page 53
 
 // -------------------------------------------------------------------------------
 // Page
