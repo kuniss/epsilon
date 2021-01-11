@@ -962,7 +962,7 @@ The plans _EVS~r~^i^_ become an extended visit sequence
 
 _EVS~r~_ = _EVS~r~^0^ EVS~r~^n(X)_^ with _X_ = _X~0~^r^_ 
 
-summarised. Note that each affix parameter _a~k~_^(_r_,_j_)^ of the rule _r_ is an element of exactly one set in _EVS~r~_ which is defined by _set~r~_(_ak_^(_r_,_j_)^) uniquely. For two elements _u_ and _v_ of the extended visit sequence _EVS~r~_, a relation "<" is now defined so that _u_<_v_ applies if _u_ precedes _v_ in the sequence _EVS~r~_. Analogously the relation "≤" is defined.
+summarised. Note that each affix parameter _a~k~_^(_r_,_j_)^ of the rule _r_ is an element of exactly one set in _EVS~r~_ which is defined by _set~r~_(_ak_^(_r_,_j_)^) uniquely. For two elements _u_ and _v_ of the extended visit sequence _EVS~r~_, a relation "<" is now defined so that _u_<_v_ applies if _u_ precedes _v_ in the sequence _EVS~r~_. Analogously the relation "≤" is defined. 
 
 // -------------------------------------------------------------------------------
 // Page 53
