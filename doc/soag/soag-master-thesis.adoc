@@ -967,6 +967,45 @@ summarised. Note that each affix parameter _a~k~_^(_r_,_j_)^ of the rule _r_ is 
 // -------------------------------------------------------------------------------
 // Page 53
 
+// doc\soag\images\figure 7-1-unsuitable-calculation-sequences-for-basement-storage.PNG
+
+In principle, there are two cases of evaluation order that exclude the implementation of an affix position instance as a basement memory. Let _α~1~_ and _α~2~_ be two instances of the affix position _a^X^_ and _β_, _γ_ the instances of two other affix positions. If now β is calculated from _α~1~_ and γ from _α~2~_, then _β_ must not be calculated before _γ_ if _a^X^_ is to be implemented as a basement memory (see Figure 7-1, first drawing; the thick line symbolises the chronological order of the computations, the thin arrows indicate the data flow dependencies). For if the values of _α~1~_ and _α~2~_ are located on the basement memory, so that _α~2~_ is on top, then the value of _α~1~_ cannot be accessed when calculating _β_. The same applies in the case (see Figure 7-1, second drawing) that _β_ and _γ_ are identical. To calculation of _β_ = _γ_, both the highest and the lowest value of the basement storage would have to be used. However, on a cellar storage only the uppermost value is always accessible, and it is not clear in which order the two values are needed in the calculation. All other sequences do not interfere with the use of a cellar memory. Particularly interesting in this context are the Particularly interesting in this context are the "embedded" calculation sequences as shown in Figure 7-2.
+
+// doc\soag\images\figure-7-2- (Embedded)-calculation-sequences.PNG
+
+In order to be able to express the above-mentioned problem in a theorem that unambiguously determines whether an affix position _a^X^_ can be implemented as a cellar memory, the set of ^_visit dependencies_ _VDS_(_a^X^_), which is defined as follows: 
+
+Definition 7-1(_VDS_(_a^X^_)):
+
+_VDS_(_a~m~^X^_) contains all tuples (_Y_,(_i,j_)) with _Y_ ∈ _HN_, _i,j_ ∈ [_1,n_(_Y_)] and _i_<_j_, for which there exists a decorated derivation tree _t_ and a subtree _t~0~_ whose root is marked with _Y_ exist, so that for adependency (_a~l~_(_r,k_)^, _b_^(_r_)^) ∈ _DP_(_r_) with _m_=_l_ and _X_=_X~k~^r^_ the affix parameter _a~l~_^(_r,k_)^ during the _i_-th visitof the node marked with _Y_ and _b_^(_r_)^ during the jth visit.
+
+For the investigation of an affix position, only those direct dependencies are of interest that are determined by an affix parameter corresponding to the affix position. The calculation of the quantity _VDS_ can be abstractly described as follows:
+
+Step 1: For all hyper-rules _r_=_X~0~_: _X~1~_..._X~#S_(_r_)~ and all direct dependencies (_a~l~_^(_r,k_)^, _b_^(_r_)^) ∈ _D_(_r_), for which _a~l~_^(_r,k_)^ is the corresponding affix parameter to the affix position _a^X^_ the tuple (_X~0~_, (_i,j_)) is transformed into _VDS_(_a^X^_) if _a~l~_^(_r,k_)^ during the plan _VS~i~^r^_ and _b_^(_r_)^ during schedule _VS~j~^r^_ and _i_<_j_ is calculated.
+
+Step 2: For all tuples (_Y_,(_i,j_)) of the set _VDS_(_a^X^_), each hyper-rule _r_=_X~0~_: _X~1~_..._X~#S_(_r_)~ and each :_m_ ∈ [1,_#S_(_r_)] with _X~m~_=_Y_, the tuple (_X~0~_,(_p,q_)) is inserted into the set _VDS_(_a^X^_) if the visit instructions _VISIT_(_X~m~,i_) in the plan _VS~p~^r^_ and _VISIT_(_X~m~,j_) in the schedule _VS~q~^r^_ occur. This is repeated until no more tuples are added to _VDS_(_a^X^_) no more new tuples are added.
+
+// -------------------------------------------------------------------------------
+// Page 54
+
+Theorem 7-1:
+
+The instance of an affix position _a_ cannot be implemented as a cellar memory in the generated SOAG evaluator if a hyper-rule _r_=_X~0~_: _X~1~_..._X~#S_(_r_)~ exists. such that (at least) one of the following four conditions applies following four conditions apply: 
+
+1. there exist two direct dependencies (_b,c_) ∈ _DP_(_r_) and (_d,e_) ∈ _DP_(_r_), such that _b_ and _d_ are corresponding affix parameters to the affix position _a_ and 
+
+_set~r~_(_b_) < _set~r~_(_d_) < _set~r~_(_c_) < _set~r~_(_e_) in _EVS~r~_. 
+
+2. there is a direct dependence (_b,c_) ∈ _DP_(_r_) where _b_ is a corresponding affix parameter to the affix position _a_. affix parameter to the affix position a and there exists a tuple (_X~m~_, (_i,j_)) in _VDS_(_a_) with _m_ ∈ [1,_#S_(_r_)], such that 
+
+_set~r~_(_b_) < _VISIT_(_X~m~,i_) < _set~r~_(_c_) < _VISIT_(_X~m~,j_) holds in _EVS~r~_.
+
+3. as in 2., except that _VISIT_(_X~m~,i_) < _set~r~_(_b_) < _VISIT_(_X~m~,j_) < _set~r~_(_c_) in _EVS~r~_ holds.
+
+4. there exist two tuples (Xk, (i,j)) and (Xm,(p,q)) in VDS(a) with k,m ∈ [1,#S(r)] and k≠m such that.
+VISIT(Xk,i) < VISIT(Xm,p) < VISIT(Xk,j) < VISIT(Xm,q) holds in EVSr.
+The proof of this theorem can be found in <<EngJong>>.
+
 // -------------------------------------------------------------------------------
 // Page
 
