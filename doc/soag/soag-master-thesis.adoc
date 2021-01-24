@@ -1004,7 +1004,7 @@ _set~r~_(_b_) < _VISIT_(_X~m~,i_) < _set~r~_(_c_) < _VISIT_(_X~m~,j_) holds in _
 
 4. there exist two tuples (Xk, (i,j)) and (Xm,(p,q)) in VDS(a) with k,m ∈ [1,#S(r)] and k≠m such that.
 VISIT(Xk,i) < VISIT(Xm,p) < VISIT(Xk,j) < VISIT(Xm,q) holds in EVSr.
-The proof of this theorem can be found in <<EngJong>>.
+The proof of this theorem can be found in <<EngJong>>. 
 
 // -------------------------------------------------------------------------------
 // Page
