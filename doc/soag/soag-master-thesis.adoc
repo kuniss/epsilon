@@ -936,7 +936,7 @@ With a table load of less than 50%, which is always the case with the above tabl
 // -------------------------------------------------------------------------------
 // Page 52
 
-=== Optimisation of affix variable storage
+== Optimisation of affix variable storage
 
 During the evaluation of a decorated derivation tree of an EAG, the instances of all affix positions are computed one after the other in the form of their affix variables and must be available in the memory, as the syntheses of other affix positions can refer to them. The storage of the affix position instances takes up a lot of space, and efforts are therefore being made to find an optimisation for this. 
 
@@ -1060,14 +1060,51 @@ position in                 _EVS_ = (_V_ * 3 + 2) - 1 = _V_ * 3 + 1,
 
 synthesized: position in    _EVS_ = (_V_ * 3 + 2) + 1 = _V_ * 3 + 3.
 
-The procedure CheckStorageType performs the actual calculation of the optimization properties for a given affix position. for a given affix position. It implements in its subprocedures CheckT2P1andT1P1, CheckT1P2andP3, CheckT1P4, CheckT2P2, CheckT2P3 and CheckT2P4 it implements the single conditions formulated in the Theorems formulated conditions. If one of the conditions is true, one of the global variables  admissible and disjoint are set to FALSE. The optimization properties will be set to FALSE for all Affixposition in evaluator rules and all inherited Affixposition in predicates are computed.  
+The procedure `CheckStorageType` performs the actual calculation of the optimization properties for a given affix position. for a given affix position. It implements in its subprocedures `CheckT2P1andT1P1`, `CheckT1P2andP3`, `CheckT1P4`, `CheckT2P2`, `CheckT2P3` and `CheckT2P4` it implements the single conditions formulated in the Theorems formulated conditions. If one of the conditions is true, one of the global variables `admissible` and `disjoint` are set to `FALSE`. The optimization properties will be set to FALSE for all Affixposition in evaluator rules and all inherited Affixposition in predicates are computed.  
 
-The exported Optimize procedure performs the optimization calculation for all necessary affix positions. for all necessary affix positions. The optimization properties of an affix position are stored in the data structure SOAG.StorageName data structure. If zero is entered in this field for an affix position, no optimization can be performed. A negative entry means that the affix position can be implemented as a global variable. the absolute value specifies the number of the variable from which a unique name is generated for the evaluator. unique name is generated for the evaluator. A positive entry indicates the number of the cellar memory to be used for the affix position is to be used.
+The exported `Optimize` procedure performs the optimization calculation for all necessary affix positions. for all necessary affix positions. The optimization properties of an affix position are stored in the data structure `SOAG.StorageName` data structure. If zero is entered in this field for an affix position, no optimization can be performed. A negative entry means that the affix position can be implemented as a global variable. the absolute value specifies the number of the variable from which a unique name is generated for the evaluator. unique name is generated for the evaluator. A positive entry indicates the number of the cellar memory to be used for the affix position is to be used.
 
 // -------------------------------------------------------------------------------
 // Page 56
 
+=== Implementations
 
+// -------------------------------------------------------------------------------
+// Page 62
+
+== Effort analysis
+
+First, in order to be able to express the total effort to be investigated for the approximating SOAG procedure the following quantities are introduced: 
+
+_x_ = _max_{|_A_(_X_)| : _X_ ∈ _HN_} max. number of affix positions per symbol and 
+
+_p_ = _max_{ _#S_(_r_)+1 : _r_ ∈ _HR_} max. number of symbol occurrences per hyper-rule. 
+
+The initialization step _TDP_ = (_D^-1^_)^+^ is trivial, since due to the Bochmann normal form _D^-1^_ is already transitive is.
+
+The implementation of the transitive closed _ind_-operator requires transitive insertions in _TDP_.  It should be noted that in the case of backtracking (see Section 5.3 "Two heuristic subclasses of the SOEAGen") additional overhead has to be considered. For leads for an arrangement to be determined between two affix positions _a_ and _b_, the adoption of the preferred dependence (_a,b_) on corresponding _TDP_ including inducing leads to a cycle, the newly added dependencies must first be removed from _TDP_ again. dependencies must first be removed from _TDP_ before the reverse dependency (_b,a_) can be adopted. can be taken over. Therefore, the extensions of _TDP_ are accounted for with corresponding effort. is kept. 
+
+To determine a box completion _DS~j~_(_X_), a modified topological sorting of the affix positions _A_(_X_) according to the set of affix positions derived from _TDP_ = _IDP~j-1~^+^_ projected dependencies is performed. 
+
+Finally, the generation of visit sequences requires a topological sorting of the affix parameters of a rule according to the final dependencies on each rule in _TDP_ = _IDP~m~^+^_. 
+
+In summary, then, with respect to the implementation of the method, two characteristic algorithms are essential for the overall effort:
+
+- _topological sorting_ of affix positions or affix parameters and
+- _transitive insertion_ of dependencies between affix parameters.
+
+A topological sort of affix positions _A_(_X_) for determining a box completion _DS~j~_(_X_) for an _X_ ∈ _HN_ is of effort _O_(_x^2^_); a topological sorting of the affix parameters at most _p x_ belonging to a rule _r_ in the course of generating a visit sequence for _r_ is of effort _O_(_p^2^ x^2^_).
+
+As explained in Section 5.4 "Dynamic transitive hull", the stepwise transitive expansion requires of an arbitrary relation R+ over a finite carrier set _S_ by the dependencies from a set _R′_ ⊆ _S^2^_ requires an overhead of _O_(|_S_|^3^). Assume that the elementary orientation order determined by the described procedure for the present EAG determined by the described procedure for the EAG at hand (_C~1~,...,C~m~_) is immediately successful, then successively all _m_ affix position orders can be transferred to the corresponding affix parameters in _TDP_ and induced without causing a cycle. And cumulatively, all transitive insertions in _TDP_ then cause the effort _O_(|_HR_| _p^3^ x^3^_), because in _TDP_ only dependencies between at most _p x_    affix parameters of one hyper-rule can arise.
+
+In the case of a successful instead of an _immediately_ successful orientation sequence, a certain number of affix arrangements will not be generated with the preferred affix parameter, but only with the reverse affix parameter dependence expanded to an acyclic _TDP_. Let this number be denoted by β then an additional β-times further effort of -O_(|_HR_| _p^3^ x^3^_) for transitive insertions into _TDP_ to be calculated, which led to one cycle. This effort also covers the necessary retractions of the _TDP_ extensions made. For the effort of the entire procedure, the following results thus provisionally 
+
+_O_(|_HN_| _x^2^ x^2^_ + |_HR_| _p^2^ x^2^_ + |_HR_| _p^3^ x^3^_ (1 + β)) = _O_(|_HN_| _x^4^_ + |_HR_| _p^3^ x^3^_(1 + β)). 
+
+The summand |_HN_| _x^4^_ is a consequence of the assumption that for the _j_-th (1 ≤ _j_ ≤ _m_ ≤ |_HN_| _x^2^_) to be defined arrangement of two affix positions from _I_(_X_) * _S_(_X_), a complete topological sorting of _A_(_X_) according to the projection of _IDP~j-1~_+ onto _A_(_X_) with the result _DS~j~_(_X_) is necessary, although the validity of _IDP~j-1~_+ ⊆ _IDP~j~_+ is guaranteed and thus information from the (_j_-1)-th topological sorting process could flow into the _j_-th one could flow into it. The algorithm presented in section 5.5 "Dynamic topological sorting" processes the effects of the extension of _TDP_ = _IDP~j-1~+_ to _TDP_ = _IDP~j~+_ on the projection of _TDP_ on _A_(_X_) in such a way that when sorting _A_(_X_) topologically according to this projection, all the
+
+// -------------------------------------------------------------------------------
+// Page 63
 
 // -------------------------------------------------------------------------------
 // Page
