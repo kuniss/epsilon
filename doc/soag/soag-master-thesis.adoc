@@ -1006,6 +1006,69 @@ _set~r~_(_b_) < _VISIT_(_X~m~,i_) < _set~r~_(_c_) < _VISIT_(_X~m~,j_) holds in _
 VISIT(Xk,i) < VISIT(Xm,p) < VISIT(Xk,j) < VISIT(Xm,q) holds in EVSr.
 The proof of this theorem can be found in <<EngJong>>. 
 
+=== Optimization through global variables
+
+If the lifetimes of instances of affix positions implemented as basement memories do not overlap each other or, in other words, if there is always at most one value in the cellar then the affix position can also be implemented as a global variable. 
+
+In order to be able to formulate a theorem that unambiguously states whether an affix position can be implemented as a global variable, the _set of visits_ _VS_(_a^X^_) of an affix position aX which is defined as follows.
+
+Definition 7-2(_VS_(_a^X^_)):
+
+The set of visits _VS_(_a^X^_) of an affix position _a^X^_ contains all pairs (_Y,i_) with _Y_ ∈ _HN_ and _i_ ∈[_1,n_(_Y_)], for which there exist a decorated derivation tree _t_ and a node _y_, marked with _Y_, such that at least one instance of _a^X^_ is computed during the _i_-th visit of _y_.
+
+Theorem 7-2:
+
+The instance of an affix position _a_ cannot be implemented as a global variable in the generated SOAG evaluator if there is a hyper-rule _r_=_X~0~_: _X~1~...X~#S_(_r_)~. variable such that (at least) one of the following four conditions holds is true:
+
+1. there exists a direct dependency (_b,c_) ∈ _DP_(_r_) and an affix parameter _d_, so that _b_ and _d_ are corresponding affix parameters to the affix position _a_ and _set~r~_(_b_) < _set~r~_(_d_) < _set~r~_(_c_) in _EVS~r~_ is.
+
+2. there exists a direct dependence (_b,c_) ∈ _DP_(_r_) where _b_ is a corresponding affix parameter to the affix position _a_ and there exists a tuple (_X~m~, i_) in _VS_(_a_) with _m_ ∈ [_1,#S_(_r_)] such that _set~r~_(_b_) < _VISIT_(_X~m~,i_) < _set~r~_(_c_) in _EVS~r~_ holds.
+
+3. there exist a tuple (_X~m~_, (_i,j_)) in _VDS_(_a_) with _m_ ∈ [_1,#S_(_r_)] and an affix parameter _d_, where _d_ is the is the corresponding affix parameter to the affix position _a_, such that _VISIT_(_X~m~,i_) < _set~r~_(_b_) < _VISIT_(_X~m~,j_) holds in _EVS~r~_.
+
+4. there exist a tuple (_X~k~_, (_i,j_)) in _VDS_(_a_) and a pair (_X~m~,q_) in _VS_(_a_) with _k,m_ ∈ [_1,#S_(_r_)] and _k_≠_m_ such that _VISIT_(_X~k~,i_) < _VISIT_(_X~m~,q_) < _VISIT_(_X~k~,j_) in _EVS~r~_ holds. 
+
+The proof of this theorem can be found in <<EngJong>>.
+
+=== Implementation details
+
+The algorithms for calculating the optimization possibilities of affix position storage are implemented in the
+`SOAGOptimizer` module. It contains the following module-global data structures:
+
+    VAR
+        PN: SOAG.OpenInteger;
+        VDS, VS: ALists.AList;
+        admissible, disjoint: BOOLEAN;
+        GlobalVar, StackVar: INTEGER;
+
+// -------------------------------------------------------------------------------
+// Page 55
+
+The `PN` field extends the list of visit sequences `SOAG.VS`. By the initialization procedure `Init` the number of the each entry in `SOAG.VS` is assigned the number of the visit plan in which the entry is contained. This is necessary to avoid having to calculate the visit number dynamically. The possibly in the entry cannot be used, because it refers to the node to be visited.
+
+The sets _VDS_(_a_) and _VS_(_a_) introduced in the upper chapters are implemented by the two lists `VDS` and `VS` implemented. In order to ensure the set property, the two include operations check `IncludeVDS` and `IncludeVS` check by linear search that no elements are inserted twice into the lists. are inserted twice. The calculation of the two sets is done by the procedures `InitVDSandVS` and `CompleteVDS`, where the first procedure uses the 1st step of the abstract algorithm from section 7.1 "Optimization by basement storage" as well as the calculation of the set `VS`. The second procedure completes the set `VDS` according to the 2nd step of the abstract algorithm from the mentioned section. The function `GetPlanNo` returns the number of the visit plan in which the value of the passed affix is stored. in which the value of the passed affix parameter is determined.
+
+The boolean variables `admissible` and `disjoint` contain the optimization properties of the current affix position. If `disjoint` is valid, the affix position can be implemented as a global variable. If `admissible` is set to `TRUE`, then storage in a basement memory is possible. If both variables are not set, then no optimization is possible for the current affix position. The two module-global variables `StackVar` and `GlobalVar` respectively indicate the number of the next cellar memory to be assigned or the next global variable to be assigned.
+
+Theorems 7-1 and 7-2 require the realization of relations "<" and "≤" on the set of each extended visit sequence, but these are not concretely present in the implementation. Since the two relations practically refer to positions to be compared within the extended visit sequence, they can be mapped for visit instructions to a comparison of the positions within the "simple" visit sequence. for visit instructions. In order to avoid the subsequent realization of the extended visit sequence for the _set~r~_(_a_) function, the "simple" visit sequence is symbolically stretched so that an additional position is added before and after each visit instruction is freed before and after each visit instruction. The two functions `GetEVSPosforAffOcc` and `GetEVSPosforVisit` realize this symbolic stretching. The function `GetEVSPosforVisit` function determines the position of the given visit instruction in the "simple" visit sequence, multiplies it by three and adds two to place it in the center of the expanded area. Let V be the position of the visit instruction in the "simple" visit sequence, then we get the position of the visit instruction in the extended visit sequence is given by 
+
+Position in _EVS_ = _V_ * 3 + 2.
+
+The function `GetEVSPosforAffOcc` determines for an affix parameter the position of the visit instruction before or after which the value of the affix parameter will be calculated, and positions the set containing the affix parameter before or after the corresponding visit instruction. In Depending on whether the affix parameter corresponds to an inherited or synthesized affix position, the position in the extended visit sequence is calculated as inherited: 
+
+position in                 _EVS_ = (_V_ * 3 + 2) - 1 = _V_ * 3 + 1,
+
+synthesized: position in    _EVS_ = (_V_ * 3 + 2) + 1 = _V_ * 3 + 3.
+
+The procedure CheckStorageType performs the actual calculation of the optimization properties for a given affix position. for a given affix position. It implements in its subprocedures CheckT2P1andT1P1, CheckT1P2andP3, CheckT1P4, CheckT2P2, CheckT2P3 and CheckT2P4 it implements the single conditions formulated in the Theorems formulated conditions. If one of the conditions is true, one of the global variables  admissible and disjoint are set to FALSE. The optimization properties will be set to FALSE for all Affixposition in evaluator rules and all inherited Affixposition in predicates are computed.
+
+The exported Optimize procedure performs the optimization calculation for all necessary affix positions. for all necessary affix positions. The optimization properties of an affix position are stored in the data structure SOAG.StorageName data structure. If zero is entered in this field for an affix position, no optimization can be performed. A negative entry means that the affix position can be implemented as a global variable. the absolute value specifies the number of the variable from which a unique name is generated for the evaluator. unique name is generated for the evaluator. A positive entry indicates the number of the cellar memory to be used for the affix position is to be used.
+
+// -------------------------------------------------------------------------------
+// Page 56
+
+
+
 // -------------------------------------------------------------------------------
 // Page
 
