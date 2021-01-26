@@ -1257,7 +1257,7 @@ In a synthesis, for the instance of an affix parameter, its value is calculated.
 
 // doc\soag\images\figure-9-3-synthesis-of-the-set-'2'-N-to-the-value-range-symbol-N.PNG
 
-==== Analyses
+==== Analyses 
 
 // -------------------------------------------------------------------------------
 // Page
