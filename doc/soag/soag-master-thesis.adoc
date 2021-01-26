@@ -1259,8 +1259,317 @@ In a synthesis, for the instance of an affix parameter, its value is calculated.
 
 ==== Analyses 
 
+In an analysis, the value of an affix parameter instance is compared with the structure given by the affix form of the affix parameter. is compared with the structure given by the affix form of the affix parameter. Since this value is available as a derivation tree, the node identifiers are checked during a preorder traversal at compiler runtime. If the tree structure corresponds to the affix form, the corresponding subtrees are determined for the affixes occurring in it. In order to nested indexing when accessing the subtrees, temporary variables are used for the elimination of common subexpressions (an example is shown in Figure 9-4). This additionally optimizes the runtime of the compiler.
+
+// doc\soag\images\figure-9-4-analysis-of-the-set-'2'-D-for-the-value-range-symbol-N.PNG
+
+==== Compare
+
+If an affix _M_ occurs more than once in affix forms defining affix parameters of an evaluator rule, then the values of the affix instances must be equal due to the requirement of consistent substitution. In contrast the values of two affix instances _M_ and _#M_ must be different. The occurrence of an affix is
+
 // -------------------------------------------------------------------------------
-// Page
+// Page 68
+
+is always compared with the defining occurrence of the affix whose content was recorded in the affix variable. was recorded. The check is simply realized by comparing the derivation trees of the affix instance and the affix variable. For this purpose the boolean function `Equal` is called, which performs a recursive traversal of both derivation trees and terminates in case of unequal references. To check whether two trees are different, the result is negated. A call of this procedure takes place during the analysis, directly after determination of the corresponding subtree.
+
+==== Predicates
+
+Predicates can only be derived to the empty word, they contribute nothing to the context-free definitions of the source language. In the specification of a compiler, they rather serve to isolate "computations". Because of the ambiguity intentionally allowed for predicates, they must be treated specially. For the generation of the predicates the procedure `GenPredProcs` of the module `SLEAG` is used. 
+
+During the evaluation of a predicate a derivation of the empty word must be found on the basis of the parameterization in general by backtracking. generally be found by backtracking. The failure of an analysis and/or a comparison shows here not an error but a dead end, the selection of the appropriate alternative is essential here. For this all alternatives are tried out one after the other:
+----
+    PROCEDURE P (formal parameters): BOOLEAN;
+    ...
+    BEGIN
+        failed := TRUE;
+        Code to check the first alternative
+        IF failed THEN
+            Code to check the second alternative
+            ...
+        END;
+        RETURN ~ failed
+    END P;
+----
+For an alternative, the analyses and comparisons as well as the procedure calls of the corresponding predicates control the further flow of control. This is appropriately formulated by nested IF statements. Thereby the analyses not formulated in the following scheme, in particular the verification of the single node identifier, must also be converted into nested IF statements.
+----
+    (* Start of an alternative *)
+    IF Analysis of the input parameters of the left side (possibly comparisons)
+        successful THEN
+        ...
+        Synthesis of the input parameters to P'
+        IF P'(current parameters) THEN
+            IF Analysis of the output parameters for P' (possibly comparisons)
+                successful THEN
+                ...
+                Synthesis of the output parameters of the left side
+                (possibly transfer)
+                failed := FALSE;
+                ...
+            END
+        END;
+        ...
+    END;
+    (* End of alternative *)
+----
+Only the call of a predicate procedure from an evaluator procedure leads on failure to an error message.
+----
+    Synthesis of the input parameters to P
+    IF ~ P (current parameters) THEN Error handling END;
+    Analysis of the output parameters to P (possibly comparisons)
+----
+Before a predicate procedure is called in the generated compiler, the input parameters are synthesized. input parameters. After execution the output parameters are analyzed and possibly comparisons are made.
+
+// -------------------------------------------------------------------------------
+// Page 69
+
+is performed. As parameters of predicates the affix positions belonging to the symbol of the predicate are used in the field `AffPos`. affix positions in the `AffPos` field. Exceptions to this are parameters that directly result in affix variables result.
+
+==== Error handling
+
+Analyses, comparisons and predicates can fail. This indicates context errors and prevents correct translation. However, an abort of the generated compiler is not acceptable, instead the Instead, the program flow should be continued in order to be able to find and report further context errors. Thereby subsequent errors are to be suppressed.
+
+Differently than with failing comparisons the program sequence cannot be continued with failing analyses without because, in general, the subtrees of the corresponding affix form are not checked against the affixes of the affix form are assigned values. These affixes, like the output parameters of failing predicates to defined values.
+
+It is a good idea to create a special error node which has the maximum stellarity of all rules occurring in the MetaGrammar. Each of its subtrees in turn points to the error node. A reference to this node is used as error value in case of context errors. Subsequent errors can then be detected and suppressed using this value. In the implementation the first entries of the heap form the error node. The error value is denoted by the constant `errVal` and refers to this node.
+
+If the check of a node identifier fails in an analysis, the reference to the node is replaced by the error value. When the analysis is continued, the structure of the error node then results in, which was constructed with maximum significance, the error value also results for all subtrees. Thus also all temporary variables and affixes are set to this value. The reporting of subsequent errors is
+suppressed if the error value is already examined:
+----
+    IF V # errVal THEN error message; V := errVal END;
+----
+If a predicate fails, all its output parameters are set to the error value. Error messages are only issued in this case if none of the input parameters has the error value. If the comparison of two trees fails, the error message is suppressed if for at least one the error value is present:
+----
+    IF (V1 # errVal) & (V2 # errVal) THEN error message END;
+----
+To reduce the size of the generated code, the error handlings in the procedures `AnalyseError`, `Eq`, `UnEq` as well as `CheckP` for a predicate _P_ are combined. 
+
+The texts of the error messages are created automatically by the generator from the identifiers occurring in the specification. in the specification. Together with the error message a position in the input text is output. Analysis error messages for hyper non-terminal _N_ have the form "analysis in _N_ failed". For failed comparisons the name of the affix _M_ is combined with the name of the corresponding hyper-non-terminal to the error message "_M_ failed in _N_". If a predicate _P_ fails, the error message "predicate _P_ failed" is output.
+
+// doc\soag\images\figure-9-5-explanation-of-the-memory-structure-in-the-generated-evaluators.PNG
+
+==== Optimization of terminal affix forms 
+
+Terminal affix forms are constant in the sense that they are always represented in the evaluator by the same trees. in the evaluator. In principle, a synthesis has to be done only once; later it is sufficient to supply a reference to the tree. Likewise, for each final rule (without non-terminals) a leaf must be used only once in the heap.
+
+// -------------------------------------------------------------------------------
+// Page 70
+
+are present. By such a _constant convolution_ the memory requirement can be lowered, and naturally a shorter and faster program results. In the implementation all leaves and the trees of terminal affix forms are presynthesized in a reserved part of the heap. The references are thus known and can be used in syntheses. The end of this reserved area, as shown in Figure 9-5, is marked by the constant `predefined`. The example of a synthesis from Figure 9-3 thus changes to:
+----
+    (* synthesis of the set '2'N to the value range symbol N *)
+    A := NextHeap;
+    Heap[NextHeap] := 33;
+    Heap[NextHeap + 1] := 4;
+    Heap[NextHeap + 2] := V;
+    INC(NextHeap, 3);
+----
+In general, terminal affix forms cannot be used in analyses, since the trees to be analyzed can be trees to be analyzed may have arisen in many different ways. However, since leaves are present exactly once in the heap the verification of the node identifier can be abbreviated by a verification of the reference. can be abbreviated. This changes the example in Figure 9-4 to:
+----
+    (* analysis of the set '2'D to the value range symbol N *)
+    V1 := A;
+    IF Heap[V1] # 33 THEN error handling END; V2 := Heap[V1 + 1];
+    IF V2 # 4 (* reference to a sheet *) THEN error handling END;
+    V3 := Heap[V1 + 2];
+    IF Heap[V3] # 18 THEN Error handling END;
+    V := Heap[V3 + 1];
+----
+
+==== Free space management
+
+Since memory for nodes is explicitly requested during syntheses but never explicitly freed, and since a large part of the heap is potentially used for the representation of intermediate results with temporary meaning. the evaluator should be able to be supplemented optionally by a free memory management. Thereby a reference counter procedure is used in the generated evaluator, in which the references to roots in temporary variables are logged to the roots of trees at runtime, which does not allow an immediate reuse. immediate reuse of no longer referenced nodes.
+
+The reference to a tree is expressed by incrementing the counter of the root node. Through Collapsing, multiple references to subtrees are created. If the last reference loses its validity the root node as well as all nodes of its subtrees, to which no further reference exists, are released by entering them in free memory lists. Requested heap memory is then  primarily taken from these lists.
+
+New references are created when evaluating instances of applying affix parameters according to their affix form. They result from the references to the subtrees described by affixes in the affix form subtrees during synthesis of the derivation trees and from the assignment of the synthesized trees to the affix parameters. It is only with the last visit of a rule that the reference to a tree representing the parameter value of a defining item loses its validity and is released.
+
+For the error node and for presynthesized trees of terminal affix forms, the procedure works accordingly. When setting the error value, the faulty (sub)tree loses its reference, the error node gets another one to prevent a release without special treatment. Through a synthesis results in an additional reference to a presynthesized tree. In the implementation, the node identifier is conceptually extended by the reference counter to a triple extended. The additional constant `refConst` is used for the reconstruction of the components as follows. used:
+----
+    Reference counter = node identifier DIV refConst,
+    Digit = (node identifier MOD refConst) DIV arityConst,
+    alternative number = node identifier MOD arityConst.
+----
+In the reference counter, only the number of additional references to a node is counted.
+
+Special features arise for the parameters of a predicate call. Originally the predicate procedures were designed for one-pass compilers whose reference counting also includes procedure parameters as references.
+
+// -------------------------------------------------------------------------------
+// Page 71
+
+and thus also includes the release of parameter contents. If the procedure parameter is an affix variable, the derivation tree to which it refers loses a referencing by the Predicate call a reference count. In order to compensate for the reference count within the predicate, all affix variables that are used as input parameters in the predicate call are incremented by one reference. by one reference. This ensures that the content of the affix variables is not yet released after the predicate call. After a predicate call, the reference counters of all derivation trees referenced by the return variables refer to (affix variables excluded) are increased by one reference to high. Therefore these variables must be explicitly released after the analysis has been completed.
+
+A separate free list is created for each node position. Released nodes are managed according to their according to their position in these lists. The entries of the field `FreeList` refer to the first node of such a list. first node of such a list. The concatenation is realized in the first entry of the released nodes is realized. 
+
+In syntheses, the request for memory is now made node by node by the procedure `GetHeap`. The deletion of a reference as well as a possible release of the storage space takes place by the procedure `FreeHeap`.
+
+By application of the reference counter procedure and under the condition that no optimization  of terminal affix forms and the synthesis does not occur in a predicate procedure, the example of the synthesis changes from Example of synthesis changes from Figure 9-3 to:
+----
+    (* Synthesis of the sentence '2'N to the value range symbol N *)
+    GetHeap(2, V1); A := V1; Heap[V1] := 33;
+    GetHeap(0, V2);
+    Heap[V1 + 1] := V2; INC(Heap[V2], refConst);
+    Heap[V2] := 3;
+    Heap[V1 + 2] := V; INC(Heap[V, refConst);
+----
+Complementary reference counter operations are resolved and thus the code continues to be optimized.
+
+The example from Figure 9-4 changes under the assumption that no optimization of terminal affix forms occurs and the analysis occurs in an evaluator procedure, to:
+----
+    (* analysis of the sentence '2'D to the value range symbol N *)
+    V1 := A;
+    IF Heap[V1] MOD refConst # 33 THEN Error handling END;
+    V2 := Heap[V1 + 1];
+    IF Heap[V2] MOD refConst # 3 THEN Error handling END;
+    V3 := Heap[V1 + 2];
+    IF Heap[V3] MOD refConst # 18 THEN Error handling END;
+    V := Heap[V3 + 1];
+----
+==== Optimization of affix variable storage
+
+Optimization of affix variable storage is possible in two forms. Either the affix variable is used as a global variable or as a cellar memory. In the case of the cellar memory, the three known procedures `Push` for value storage, `Top` for return and `Pop` for release of the top cellar element. cellar element are used. Only affix variables with special properties can be optimized in their storage. can be optimized. These properties are calculated by the `SOAGOptimizer` module and are described in the Chapter 7 "Optimization of affix variable storage" in more detail.
+
+Assuming that the affix variable _V_ to the affix _N_ possesses the required properties, so that its storage can be optimized by the cellar storage `Stack1`, the code fragment of the example of a synthesis from Figure 9-3 changes under the assumption that no optimization of terminal affix forms and no reference counting takes place, to:
+----
+    (* synthesis of the set '2'N to the value range symbol N *)
+    A := NextHeap;
+    Heap[NextHeap] := 33;
+    Heap[NextHeap + 1] := NextHeap + 3;
+    Heap[NextHeap + 3] := 3;
+    Heap[NextHeap + 2] := Stacks.Top(Stack1);
+    INC(NextHeap, 4);
+----
+// -------------------------------------------------------------------------------
+// Page 72
+
+The example of an analysis from Figure 9-4 adapts under the same conditions to:
+----
+    (* analysis of the set '2'D to the value range symbol N *)
+    V1 := A;
+    IF Heap[V1] # 33 THEN Error END; V2 := Heap[V1 + 1];
+    IF Heap[V2] # 3 THEN Error END; V3 := Heap[V1 + 2];
+    IF Heap[V3] # 18 THEN Error END;
+    Stacks.Push(Stack1, Heap[V3 + 1]);
+----
+The `Pop` operation is always executed when the lifetime of an affix variable has expired. That is, when there is no longer an affix parameter for which the affix variable can be synthesized or compared in the remaining visit sequence of the rule.
+
+If the value of an affix variable, which is implemented as a cellar store, is defined by calling a predicate procedure, this call must first be parsed with the global variable associated with the predicate symbol from the variable from the `AffPos` field. After the predicate call the content of the used interface variable used is placed on the cellar memory by a `push` operation.
+
+==== Storage of position information
+
+The context-free derivation tree built by the parser is enriched by the parallel field `PosTree` with positional information. During the construction of the decorated derivation tree in the evaluator the necessary position information is transferred to the `Pos` data element of the tree data structure. The field `PosTree` field is not accessed afterwards, it is no longer needed.
+
+==== Output of the translation
+
+In the generated compiler, the values of the output parameters of the start symbol calculated by the evaluator represent calculated by the evaluator represent the translation. The EmitGen module generates code that outputs this translation. Internally the translation is represented by the evaluator by a derivation tree to the meta grammar. The output is therefore by a traversal of this derivation tree.
+
+It should be noted that the output of alternatives of a non-terminal which is marked with a token (a so-called token) should be done flush like their subtrees, i.e. without the output of a separator between the individual terminals; in the other case, however, a separator is to be output after each terminal. terminal a separator is to be output. This results in the situation that a non-terminal can be a subtoken, i.e. it can occur in a subtree of a token as well as in a subtree not starting from a token. subtree. With the output of alternatives of a subtoken therefore must be be output or not output depending on the context in the derivation tree.
+
+The meta-nonterminals can now be divided into two sets according to this output property. In the set Type3 there shall be the tokens as well as the non-terminals reachable by tokens. In the set Type2 shall contain the non-terminals which can be reached from the start symbol of the meta grammar, but without the tokens and without the non-terminals which can only be reached by tokens. Thus the subtokens form exactly the intersection of these two sets.
+
+The output takes place in the implementation by procedures, in which a case distinction over alternatives of a nonterminal takes place. Separate procedures are generated for output with and without separators. procedures are generated. For subtokens in particular two procedures are generated. In the procedures  the size of the output tree is calculated, i.e. the number of required heap entries for a non-collapsed memory mode. non-collapsed memory mode. The generated procedures can be represented by the following code scheme code scheme:
+
+// -------------------------------------------------------------------------------
+// Page 73
+----
+    (* meta non-terminal M *)
+    PROCEDURE EmitMType2/3 (Ptr: HeapType);
+    BEGIN
+        CASE Heap[Ptr] MOD arityConst OF
+          | 1: Code for the first alternative
+          .
+          .
+          | n: Code for the nth alternative
+        END
+    END EmitMType2/3;
+    
+    (* Output of meta terminal T *)
+    IO.WriteText(Out, T); (possibly IO.Write(separator); )
+    
+    (* Procedure call for meta non-terminal N *)
+    EmitNType2/3(Heap[Ptr + i]);
+----
+The generation of the output procedures is done by the procedure `GenEmitProc`. In this procedure the computation of the sets `Type2` and `Type3` by traversing the meta grammar.
+
+=== The generator
+
+==== Assignment of variable names
+
+Local variables are used in the evaluator procedures of the generated compiler for the analysis of defining affix parameters. Affix parameters, they take the references of the subtrees to be analyzed. Thereby the variable contents are only needed during the analysis and have no meaning afterwards. Since the individual analyses run independently, the same variables can be used in all analyses of an evaluator procedure. evaluator procedure. The number of the variables orients itself thereby at the most extensive analysis of the evaluator procedure. Further local variables are used for applying affix parameters in case of the use of the reference counter procedure for the memory association.
+----
+    VAR
+        LocalVars: SOAG.OpenInteger;
+        NodeName: SOAG.OpenInteger;
+----
+The local variables of an analysis are numbered in ascending order. The name of a variable results from its number supplemented by the prefix `V`. For the declaration of the variables only their maximum number must be known must be known in the most extensive analysis; this is stored for each rule in the `LocalVars` field. For each affix tree node of an analysis, the number of the local variable, which takes the reference of the node is stored in the `NodeName` field, which is parallel to `EAG.Node`. The calculation of the variable names in the above data structures is done by an evaluation-anticipating traversing all affix forms in the procedure `ComputeNodeNames`.
+
+==== Generation of the evaluator procedures
+
+The `GenVisitRul` procedure generates an evaluator procedure for each rule analogous to the code schemes given in Section 9.1.2. given code schemes. The procedure header is followed by the declaration of the local variables by the procedure `GenVarDecls`. As already mentioned, the body of the evaluator procedure is divided into two parts. In the first one the structure of the decorated derivation tree is coded. This is followed by the generation of the memory association for affix variables. Then the creation of the node and the calculation of the rule number with which it is to be marked. At the end of this part for all visit is generated for all base null terminals of the current rule, so that the construction of the decorated derivation tree can be continued recursively. 
+
+In the second part, the visit sequence of a rule is converted into corresponding Oberon statements. If the entry requires the visit of a son, it is generated by the procedure `GenVisitCall`. If the entry consists of a predicate call, the procedure `GenPredCall` generates it. Before the predicate call, the procedure `GenPredPos` assigns a position for error handling in case the predicate in case of failure of the predicate. For this purpose, the position of the preceding basic nonterminal of the current rule is used.
+
+// -------------------------------------------------------------------------------
+// Page 74
+
+For all entries just mentioned, the synthesis of the applying affix parameters must be performed before the visit or call. and afterwards the analysis of the defining affix parameters of the current visit. be performed. The generation of these code components is done by the procedures `GenSynPred` and `GenAnalPred`, respectively. To ensure that only the necessary affix parameters are analyzed, the corresponding visit number is passed to the two procedures are passed the corresponding visit number. A predicate call is not bound to any visit number, therefore the procedures are parameterized with -1 in this case.
+
+Each LEAVE entry in the visit sequence of a rule indicates the end of a plan. In this case the syntheses concluding the visit are generated, and after the output of the next visit number the generation of the analyses with which the new visit begins takes place. The `GenVisit` procedure generates the `Visit` procedure explained in section 9.1.2.
+
+==== Calculation of the anonymous predicates
+
+The analyses and syntheses of the affix parameter instances of a generated compiler are immediate components (inline code) of each implemented visit sequence. They are not executed via the detour of a procedure call, for this reason they are also called _anonymous_ predicates.
+
+The procedure `GenSynPred` generates for all applying affix parameters depending on the passed visit number the code of the synthesis of the instance value. In the synthesis, from the affix variable values of the affixes occurring in the affix form, the structure of which corresponds to the affix form of the affix parameter. Since the affix forms are also available as derivation trees at generation time, the generation of the synthesis code in the procedure `GenSynTraverse` takes place by a recursive traversal of this derivation tree, during which the corresponding synthesis actions are output. are output. As reference parameter in this procedure the next free entry in the heap is carried along as offset so that after complete traversal of a subtree the code for the creation of the next subtree can be generated. subtree can be generated. In the case of the use of the reference counter procedure this reference parameter is not necessary, since new memory is requested in the generated compiler via the procedure `GetHeap` procedure. Therefore, in this case the traversal is done by the procedure
+`GenSynTraverseRefCnt`.
+
+The access to an affix variable is generated by the procedure `GenAffix`. It distinguishes automatically whether an affix variable is to be output as a global variable, cellar memory or part of the  `Var` field. The procedure `GenAffixAssign`, which generates the left part of an assignment to an affix variable, behaves analogously. assignment to an affix variable. It is always called in combination with the procedure `GenClose` procedure. If an affix variable is implemented as a cellar store, then `GenClose` generates the closing parenthesis of the `push` operation. The information whether a closing parenthesis should be generated is provided by the by the global boolean variable `Close`. The statements in the generator
+----
+    GenAffixAssign(V); GenAffPos(S, AN); GenClose;
+----
+result in the generated compiler in the code sequence
+----
+    Stacks.Push(Stack1, AffPos[Sn+AN]),
+----
+if `V` is implemented as cellar memory `stack1`, and
+----
+    Var[V] := AffPos[Sn+AN]
+----
+if `V` is not optimizable.
+
+The `GenAnalPred` procedure generates the code for the analysis of all affix parameters to be evaluated in a visit as a function of the number for the analysis of all affix parameters to be evaluated in one visit. affix parameters to be evaluated in a visit. The coding is again performed during a traversal of the derivation tree of the affix parameters belonging to an affix parameter. affix form belonging to an affix parameter in the `GenAnalTraverse` procedure.
+
+The comparisons necessitated by the requirement for consistent substitution are performed by the two generation procedures `GenEqualPred` and `GenUnequalPred` directly into the analysis code.
+
+If the lifetime of an affix variable has expired, its release is generated by the procedure `GenFreeAffix`. is generated. If it is optimized as a cellar memory, the procedure `GenPopAffix` generates the release of the top cellar element.
+
+// -------------------------------------------------------------------------------
+// Page 75
+
+==== Data structures for the generation
+
+For the generation of a compiler the following data structures are needed:
+----
+    VAR
+        AffixOffset: SOAG.OpenInteger;
+        AffixAppls: SOAG.OpenInteger;
+        AffixVarCount: SOAG.OpenInteger;
+----
+The `AffixAppls` field is used during generation to calculate the lifetime of affix variables. For this purpose it is initialized with the values of the parallel field `SOAG.AffixApplCnt`, which contains the number of applications of the affix belonging to the affix variable. During the generation of the evaluator procedures, the value in `AffixAppls[A]` is decremented by one for each application of the affix variable `A`. If after one application of an affix variable the value is zero, then the lifetime of the affix variable has expired and it can be released. If the affix variable is implemented as a cellar memory  then the topmost value of the cellar memory can be removed.
+
+`AffixOffset` is a data structure extension of the `EAG.Var` field and takes for each affix the offset number of the corresponding variable in the `Var` field of the generated compiler. If an affix variable is optimized, its field entry contains the value `optimizedStorage`. If the value of an affix variable is not used in any synthesis and comparison, i.e. if it has no applications, its value must not be stored in any variable. must not be stored in any variable. In this case the entry in `AffixOffset` has the value `notApplied`. Value assignments to this affix variable are suppressed in the generation. The procedure `ComputeAffixOffset` calculates the content of the `AffixOffset` field for a rule.
+
+The `AffixVarCount` field records for each evaluator rule the number of affix variables to be generated in the `Var` field of the generated compiler.
+----
+    VAR
+        SubTreeOffset: SOAG.OpenInteger;
+----
+Since there are no predicates in the decorated derivation tree, in contrast to the evaluator rules, the offsets of the basic non-terminals in the tree must be calculated in the `SubTreeOffset` field. This field is parallel to `SOAG.SymOcc`.
+----
+    VAR
+        FirstRule: SOAG.OpenInteger;
+----
+
+// -------------------------------------------------------------------------------
+// Page 76
 
 // Example for image
 // doc\soag\images\image-3.1-system-structure.PNG
