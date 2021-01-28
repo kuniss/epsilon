@@ -1567,18 +1567,127 @@ Since there are no predicates in the decorated derivation tree, in contrast to t
     VAR
         FirstRule: SOAG.OpenInteger;
 ----
- 
+The context-free derivation tree provided by the parser contains in each of its nodes the number of the rule applied to it. applied to it. The rules belonging to a non-terminal are always numbered starting at one. thus forming a kind of offset to the non-terminal. In the decorated derivation tree, however, the nodes are marked with the rule numbers of the SOAG data structure, which are numbered are numbered consecutively. Since rules to a non-terminal are contiguous and in the same order as in the EAG data structure, the rule offset of a non-terminal can be used in the context-free derivation tree and the number of the first rule of the non-terminal in the SOAG data structure. the corresponding rule number can be calculated. For this purpose the number of the first rule of each symbol is calculated in the `FirstRule` field, which is parallel to `SOAG.Sym`. This field is used to calculate the rule number with which each node of the decorated derivation tree is marked.
+----
+    VAR
+        UseConst: BOOLEAN;
+        UseRefCnt: BOOLEAN;
+        Optimize: BOOLEAN;
+----
+The `UseConst`, `UseRefCnt` and `Optimize` switches control generation of a compiler using using the constant convolution, the reference counter method and the optimization of the affix variable storage. The contents of the data structures described above are calculated in the procedure `Init` procedure. 
+
+The `GenerateModule` procedure performs the actual textual generation of the compiler source file. The constant file `eSOAG.Fix` is read in and successively extended. It contains at the positions to be positions, up to which the operation `InclFix` reads the contents of the file. reads in the contents of the file. Then the required extensions are entered. The procedure Generate controls the entire generation process and is also exported.
+
 // -------------------------------------------------------------------------------
-// Page 76
+// Page 91
 
-// Example for image
-// doc\soag\images\image-3.1-system-structure.PNG
+== Appendix A: Examples of Non-OEAGs
 
+Based on the fragment of a non-OEAG shown in <<KröpKann>>, a SOEAG was constructed, which is not an OEAG. The scheme of a grammar given there resulted in the following specification.
+
+Grammar G1:
+
+// doc\soag\images\figure-A-1-dependency-subgraph-of-a-non-OEAG.PNG
+
+Figure A-1 represents part of the dependency graph of the hyper-rule for symbol _B_ of this grammar. Affix positions to a symbol are written in lower case, odd indices symbolize inherited-affix positions, even indices synthesized-affix positions.  An evaluator generator that arranges affix positions in an affix partition as late as possible ("lazy"), would determine the following two partitions for the symbols _B_ and _C_ according to <<KröpKann>>:
+
+_A_(_B_) = ({_b1,b2_}, {_b3, b4, b5, b6_}),
+
+_A_(_C_) = ({_c1, c2_}).
+
+If the affix positions are arranged as early as possible ("greedy"), the partitions result in
+
+_A_(_B_) = ({_b2, b5_}, {_b1, b3, b4, b6_}) and
+
+_A_(_C_) = ({_c1, c2_}).
+
+In order to manifest the order of calculation of the affix positions given by the partition sets in the rule dependency graph, additional dependencies, called partition dependencies, are inserted. For the grammar G~1~, a "lazy" as well as a "greedy" partition the dependencies _b3_ → _b6_ and _c1_ → _c2_, which are given by
+
+_b3_ → _b6_ → _c1_ → _c2_ → _b3_
+
+form a cycle, as can be seen in the graph in Figure A-1. The SOEAGEvaluator presented in this paper no longer computes the affix partitions independently and the affix positions are arranged as early as possible, so that the evaluator for G~1~ calculates the partitions
+
+_A_(_B_) = ({_b2,b5_}, {_b1, b3, b4, b6_}) and
+
+_A_(_C_) = ({_c2_}, {_c1_})
+
+is calculated. Instead of the original dependence between _c1_ and _c2, c2_ → _c1_ is inserted into the dependence graph, and no cycle is created anymore. This results mainly from the fact that the affix partition of symbol _B_ is computed before that of _C_ and all resulting dependencies, unlike the original in the rule dependency graph immediately, in contrast to the original OEAG method.
+
+// -------------------------------------------------------------------------------
+// Page 92
+
+and thus influence the subsequent calculation of the affix partition of the symbol _C_. The
+grammar G~1~ is therefore not an OEAG, but a SOEAG.
+
+Grammar G~2~:
 ----
-Example for code snippet
+    N = "0" .
+    S<+"0": N>: 'a'.
+    B<- N1: N, - N2: N, + N2: N, + N1: N>:
+        B<"0", N6, N3, N4>
+        C<N4,N5>C<N5,N6>.
+    C<- N1: N, + "0": N>: 'a'.
 ----
+The grammar G~2~ was created by a modification of the grammar G~1~ and is also not an OEAG. The presented SOEAG method calculates first again the affix partition of the symbol _B_ and afterwards the affix partition of the symbol _C_:
 
-// images sind unter C:\Users\Max Kuniß\git\epsilon\doc\soag\images
+// doc\soag\images\figure-A-2-dependency-subgraph-of-a-non-OEAG.PNG
+
+As can be seen inFigure A-2, which again shows only the relevant part of the dependence graph for the hyper-rule of symbol _B_, inserting the dependency _c1_ → _c2_ results in the cycle
+
+_b3_ → _b4_ → _c1_ → _c2_ → _c1_ → _c2_ → _b3_.
+
+In this situation, the dependency _c1_ → _c2_ is removed from the graph again and the inverse dependence _c2_ → _c1_ is inserted. A cycle is thus avoided and an evaluator can be generated. The new affix partition for the symbol _C_ is:
+
+_A_(_C_) = ({_c2_}, {_c1_}).
+
+Thus the given grammar is not an OEAG, but a SOEAG, which can be determined with local backtracking. can be determined.
+
+Further specification giving typical examples of "non"-OAGs from the literature (<<RepTei>> p.275,<<GySiMa>>) can be found in the `NotOEAGn.Eps` files. For all grammar examples found in the literature grammar examples, SOEAG can be computed without backtracking.
+
+// -------------------------------------------------------------------------------
+// Page 93
+
+== Appendix B: Using the SOEAG Evaluator Generator
+
+The generation of a compiler is done in four steps, which are initiated by calling the appropriate commands. are initiated.
+
+1. internalization of the specification (command: `eAnalyser.Analyse`)
+2. generation of the scanner (command: `eScanGen.Generate`)
+3. generation of the SOEAG evaluator (command: `eSOAGGen.Generate`)
+4. generation of the parser (command: `eELL1Gen.GenerateParser`)
+
+The generation of the parser must absolutely be done last in the Epsilon compiler generator, because the parser generator changes the internalized data structure irreversibly.
+
+A corresponding Oberon tool file with the commands necessary for the generation, as well as their description, can be found under the name `eSOAG.Tool`.
+
+// -------------------------------------------------------------------------------
+// Page 94
+
+== Appendix C: A Simple Example
+
+The following example specification reads in a list of a's and an equal-length list of b's. As "translation" the number of b's is output as a number.
+----
+    N = "i" N | .
+    Z* = Z "0"|Z "1"|Z "2"|Z "3"|Z "4"|Z "5"|Z "6"|Z "7"|Z "8"|Z "9"| .
+    S:<+Z: Z>
+        A<N> B<N,Z>.
+    A: <+"i" N: N> 'a' A<N> | <+ :N>.
+    B: <-"i" N: N, + Z1: Z> 'b' B<N,Z> INC<Z,Z1> | <- : N, + "0": Z>.
+    
+    INC:
+    - Z "0":Z, + Z "1":Z>|.
+    <- Z "1":Z, + Z "2":Z>|.
+    <- Z "2":Z, + Z "3":Z>|
+    <- Z "3":Z, + Z "4":Z>|
+    <- Z "4":Z, + Z "5":Z>|
+    <- Z "5":Z, + Z "6":Z>|
+    <- Z "6":Z, + Z "7":Z>|
+    <- Z "7":Z, + Z "8":Z>|
+    <- Z "8":Z, + Z "9":Z>|
+    <- Z "9":Z, + Z1 "0":Z> INC<Z, Z1>|
+    <- :Z, + "1": Z>.
+----
+The evaluator generator produces from the above specification, using constant convolution and the reference counter method, as well as with optimization of the affix variable storage the following Oberon program:
 
 // -------------------------------------------------------------------------------
 // Page 103 References
