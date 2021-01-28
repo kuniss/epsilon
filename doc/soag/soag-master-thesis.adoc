@@ -1567,7 +1567,7 @@ Since there are no predicates in the decorated derivation tree, in contrast to t
     VAR
         FirstRule: SOAG.OpenInteger;
 ----
-
+ 
 // -------------------------------------------------------------------------------
 // Page 76
 
