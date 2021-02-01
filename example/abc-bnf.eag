@@ -1,0 +1,13 @@
+// a^n b^n c^n -> |^n but in BNF 
+
+N = | "i" N.
+
+S: <+ N: N> A <N> B <N> C <N>.
+A: <+ "i" N: N> "a" A <N> | <+ : N> .
+B: <- "i" N: N> "b" B <N> | <- : N> .
+C: <- "i" N: N> "c" C <N> | <- : N> .
+
+// generator invocation: ./epsilon -s example/abc-bnf.eag
+// input: a a a b b b c c c
+// ouptut: i i i 
+// generated compiler invocation: echo aaabbbcc | ./S
