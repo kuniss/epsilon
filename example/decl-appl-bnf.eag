@@ -6,13 +6,20 @@ DeclAppl <+ Tab: Tab>:
 	Statements<, Tab>
 .
 
-Statements:
-      <- Tab: Tab, + Tab1: Tab>
-        "DECL" id<id> Statements<id ";" Tab, Tab1>
-	| <- Tab: Tab, + Tab1: Tab>
-	    "APPL" id<id> Find<id, Tab> Statements<Tab, Tab1>
-	| <- Tab: Tab, + Tab: Tab>
-.
+Statements<- Tab: Tab, + Tab1: Tab>:
+        "DECL" id<id> Statements<id ";" Tab, Tab1>.
+Statements<- Tab: Tab, + Tab1: Tab>:
+	    "APPL" id<id> Find<id, Tab> Statements<Tab, Tab1>.
+Statements <- Tab: Tab, + Tab: Tab>: .
+
+// Altermative specification for "Statements" with alternatives
+//Statements:
+//      <- Tab: Tab, + Tab1: Tab>
+//        "DECL" id<id> Statements<id ";" Tab, Tab1>
+//	| <- Tab: Tab, + Tab1: Tab>
+//	    "APPL" id<id> Find<id, Tab> Statements<Tab, Tab1>
+//	| <- Tab: Tab, + Tab: Tab>
+//.
 
 x = "a" | "b".
 id* = x | id x.
