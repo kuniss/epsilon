@@ -1,4 +1,4 @@
-Code = Code Code "ADD" | number "ENTER".
+Code = Code Code "ADD" | Number "ENTER".
 
 Expr <+ Code2>:
     Term <Code1> ExprTail<Code1, Code2>.
@@ -19,11 +19,11 @@ ExprTail<- Code, + Code>: .
 //             "+" Term <Code2> <Code1 Code2 "ADD", Code3>
 //         } <- Code, + Code>.
 
-Term <+ number "ENTER": Code>:
-    number <number>.
+Term <+ Number "ENTER": Code>:
+    number <Number>.
 
-number = "0" | "1".
+Number = "0" | "1".
 
 number:
-    <+ "0": number> "0"
-  | <+ "1": number> "1".
+    <+ "0": Number> "0"
+  | <+ "1": Number> "1".
