@@ -7,6 +7,22 @@ ExprTail<- Code1, + Code3>:
     "+" Term<Code2> ExprTail<Code1 Code2 "ADD", Code3>.
 ExprTail<- Code, + Code>: .
 
+
+Term <+ Number "ENTER": Code>:
+    number <Number>.
+
+Number = "0" | "1".
+
+number:
+    <+ "0": Number> "0"
+  | <+ "1": Number> "1".
+
+// dub build
+// generator invocation: ./epsilon -s example/expr-bnf.eag
+// Input: 1 + 0 + 1
+// Output: 1 ENTER 0 ENTER ADD 1 ENTER ADD 
+// generated compiler invocation: echo 1 + 0 + 1 | ./Expr
+
 // ExprTail shorter:
 // ExprTail:
 //     <- Code1, + Code3> "+" Term<Code2> ExprTail<Code1 Code2 "ADD", Code3> | <- Code, + Code> .
@@ -18,12 +34,3 @@ ExprTail<- Code, + Code>: .
 //         { <- Code1, + Code3>
 //             "+" Term <Code2> <Code1 Code2 "ADD", Code3>
 //         } <- Code, + Code>.
-
-Term <+ Number "ENTER": Code>:
-    number <Number>.
-
-Number = "0" | "1".
-
-number:
-    <+ "0": Number> "0"
-  | <+ "1": Number> "1".
