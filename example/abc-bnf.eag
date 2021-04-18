@@ -16,5 +16,5 @@ C<- : N>: .
 
 // build generator: dub build
 // run generator: ./epsilon -s example/abc-bnf.eag
-// run generated compiler: echo aaabbbccc | ./S
-// ouptut: i i i 
+// run generated recognizer: echo aaabbbccc | ./S -w
+// run generated recognizer: echo aaabbbcc | ./S -w
