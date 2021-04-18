@@ -1,4 +1,5 @@
-// a^n b^n c^n -> |^n but in BNF 
+// a^n b^n c^n -> |^n in BNF 
+// see abc.eag for an EBNF specifcation
 
 N = "i" N | .
 
@@ -13,8 +14,7 @@ B<- : N>:.
 C<- "i" N: N>: "c" C <N>.
 C<- : N>: .
 
-// generator build: dub build
-// generator invocation: ./epsilon -s example/abc-bnf.eag
-// input: a a a b b b c c c
+// build generator: dub build
+// run generator: ./epsilon -s example/abc-bnf.eag
+// run generated compiler: echo aaabbbccc | ./S
 // ouptut: i i i 
-// generated compiler invocation: echo aaabbbccc | ./S

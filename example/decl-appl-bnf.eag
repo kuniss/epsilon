@@ -1,8 +1,10 @@
 // declarations/applications: a reduced example in BNF
+// see decl-appl.eag for an EBNF specification
 // 
 // build generator: dub build.
 // run generator: ./epsilon -s example/decl-appl-bnf.eag
 // run generated compiler: ./DeclAppl test/decl-appl/test1
+// output: aba ; ab ;
 
 Table = | id ";" Table .
 
@@ -34,13 +36,3 @@ idTail:
 Find<- id: id, - !id ";" Table: Table>:
 	Find<id, Table>.
 Find<- id: id, - id ";" Table: Table>: .
-
-
-// Altermative specification for "Statements" with alternatives
-//Statements:
-//    <- Table, + Table1>
-//      "DECL" id<id> Statements<id ";" Table, Table1>
-//	| <- Table, + Table1>
-//	    "APPL" id<id> Find<id, Table> Statements<Table, Table1>
-//	| <- Table, + Table>
-//.
