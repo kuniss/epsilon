@@ -33,6 +33,6 @@ idTail:
     |   <- id, + id>
 .
 
-Find<- id: id, - !id ";" Table: Table>:
+Find<- id, - !id ";" Table: Table>:
 	Find<id, Table>.
-Find<- id: id, - id ";" Table: Table>: .
+Find<- id, - id ";" Table: Table>: .
